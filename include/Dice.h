@@ -2,7 +2,7 @@
 #define KERF_DICE_H
 
 int randInt(int cap);
-
+int d0(); // stand-in function for when no damage is guaranteed
 int d4();
 int d6();
 int d8();

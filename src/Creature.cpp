@@ -1,139 +1,116 @@
-#include <Creature.h>
-#include <Dice.h>
+#include "Attack.h"
+#include "Creature.h"
+#include "Dice.h"
+#include "Action.h"
 
 void Creature::initRoll() {
-	if (hasInitAdvantage && !hasInitDisadvantage) {
-		init = d20adv() + dex;
-	}
-	else if (!hasInitAdvantage && hasInitDisadvantage) {
-		init = d20dis() + dex;
-	}
-	else {
-		init = d20() + dex;
-	}
+	init = d20() + dex;
 }
 
-bool Creature::checkHit(int attack) {
-	// just compare attack to ac for now. reactions pending
-	return attack >= ac;
+bool Creature::checkHit(Attack* attack) {
+	if (m_dodge) attack->setDisadvantage(true);
+	return attack->atk() >= ac;
 }
 
-void Creature::takeDamage(int dmg, DMG_TYPE type) {
-	// reduce temphp first
-	int diff = temphp - dmg;
+void Creature::takeDamage(Attack* attack) {
+	// reduce m_tempHP first
+	int diff = m_tempHP - attack->dmg();
 	if (diff > 0) {
-		temphp -= dmg;
+		m_tempHP = diff;
 	}
 	else if (diff == 0) {
-		temphp = 0;
+		m_tempHP = 0;
 	}
 	else {
-		hp += diff;
+		m_HP += diff;
 	}
 }
 
-int Creature::attack() {
-	return d20() + attackBonus;
-}
+void Creature::takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) {
+	m_actions = m_reaction = m_bonus = m_spellCast = 1;
+	m_dodge = false;
+	_setActionPriorities(friends, enemies);
 
-int Creature::doDamage() {
-	return dmgFunc();
-}
-
-void Player::takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) {
-	// movement ignored for now
-
-	// do action if able -- for now, choose a random foe and attack
-	for (int attackNum = 0; attackNum < attacksPerAction; attackNum++) {
-		Creature* foe = nullptr;
-		size_t nFoes = foes.size();
-		int index = randInt(nFoes) - 1;
-		for (size_t iter = 0; iter < nFoes; ++iter) {
-			if (foes[(iter + index) % nFoes]->alive) {
-				foe = foes[(iter + index) % nFoes];
+	while (m_actions > 0) {
+		for (auto& p : m_actionPriorities) {
+			Action* act = Action::tryAction(p, this);
+			if (act->isUsable(friends, enemies)) {
+				act->invoke(friends, enemies);
 				break;
 			}
 		}
+	}
+}
 
-		if (foe != nullptr) {
-			if (foe->checkHit(attack())) {
-				foe->takeDamage(doDamage(), dmgType);
+// Choose a random standing target
+Creature* Creature::chooseAttackTarget(const std::vector<Creature*>& enemies) {
+	size_t nEnemies = enemies.size();
+	size_t index = randInt(nEnemies) - 1;
+	Creature* ret;
+	for (size_t iter = 0; iter < nEnemies; ++iter) {
+		ret = enemies[(iter + index) % nEnemies];
+		if (ret->alive) return ret;
+	}
+	return nullptr;
+}
+
+bool Creature::loadNextAttack(Attack* atk) {
+	return true;
+}
+
+// later on this may be more context sensitive
+void Creature::_setSpellPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
+	m_spellPriorities.clear();
+	if (m_archetype == SUPPORT_CASTER) {
+		m_spellPriorities.push_back(HEAL_PRIORITY);
+		m_spellPriorities.push_back(SELF_HEAL_PRIORITY);
+		m_spellPriorities.push_back(SUPP_PRIORITY);
+		m_spellPriorities.push_back(SELF_SUPP_PRIORITY);
+		m_spellPriorities.push_back(HARASS_PRIORITY);
+		m_spellPriorities.push_back(DMG_PRIORITY);
+	}
+	m_spellPriorities.push_back(DMG_PRIORITY);
+	m_spellPriorities.push_back(SELF_HEAL_PRIORITY);
+	m_spellPriorities.push_back(HARASS_PRIORITY);
+	m_spellPriorities.push_back(HEAL_PRIORITY);
+	m_spellPriorities.push_back(SUPP_PRIORITY);
+	m_spellPriorities.push_back(SELF_SUPP_PRIORITY);
+}
+
+// later on this may be more context sensitive
+void Creature::_setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
+	m_actionPriorities[0] = SPELL;
+	m_actionPriorities[1] = ATTACK;
+	m_actionPriorities[2] = DODGE;
+	m_actionPriorities[3] = DISENGAGE;
+	m_actionPriorities[4] = DASH;
+}
+
+Spell* Creature::chooseSpell(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
+	if (m_spellCast == 0) return nullptr;
+	_setSpellPriorities(friends, enemies);
+	std::vector<Spell*> spellChoices;
+
+	int maxLvl = 0;
+	for (int iter = 0; iter < SPELL_LVL_COUNT; ++iter) {
+		if (m_spellSlots[iter] > 0) maxLvl = iter + 1;
+	}
+
+	// choose spells according to priority
+	for (auto& pr : m_spellPriorities) {
+		for (auto& spl : m_spellbook) {
+			// exclude any spells for which no slots are available
+			if (spl->lvl() <= maxLvl) {
+				if(spl->priority() == pr) spellChoices.push_back(spl);
 			}
 		}
 	}
 
-	// bonus action ignored for now
-
-}
-
-void Player::takeDamage(int dmg, DMG_TYPE type) {
-	Creature::takeDamage(dmg, type);
-	if (hp <= 0) {
-		alive = false;
-		stable = false;
-		deathSaves = 0;
-		deathFails = 0;
-	}
-	if (hp < (-maxhp / 2)) dead = true;
-}
-
-bool Player::deathCheck() {
-	int roll = d20();
-	if (roll == 1) {
-		deathFails += 2;
-	}
-	else if (roll == 20) {
-		alive = true;
-		hp = 1;
-		return true;
-	}
-	else if (roll < 11) {
-		deathFails += 1;
-	}
-	else {
-		deathSaves += 1;
-	}
-
-	if (deathFails == 3) {
-		dead = true;
-	}
-	if (deathSaves == 3) {
-		deathSaves = 0;
-		deathFails = 0;
-		stable = true;
-	}
-	return false;
-}
-
-void Foe::takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) {
-	// movement ignored for now
-
-	// do action if able -- for now, choose a random player and attack
-	for (int attackNum = 0; attackNum < attacksPerAction; attackNum++) {
-		Creature* plyr = nullptr;
-		size_t nPlyrs = party.size();
-		int index = randInt(nPlyrs) - 1;
-		for (size_t iter = 0; iter < nPlyrs; ++iter) {
-			if (party[(iter + index) % nPlyrs]->alive) {
-				plyr = party[(iter + index) % nPlyrs];
-				break;
-			}
-		}
-
-		if (plyr != nullptr) {
-			if (plyr->checkHit(attack())) {
-				plyr->takeDamage(doDamage(), dmgType);
-			}
+	for (auto& spl : spellChoices) {
+		if (spl->identifyTargets(friends, enemies)) {
+			return spl;
 		}
 	}
 
-	// bonus action ignored for now
-
-}
-
-void Foe::takeDamage(int dmg, DMG_TYPE type) {
-	Creature::takeDamage(dmg, type);
-	if (hp <= 0) {
-		alive = false; dead = true;
-	}
+	return nullptr;
 }

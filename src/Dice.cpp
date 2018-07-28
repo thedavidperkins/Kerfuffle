@@ -16,12 +16,20 @@ int randInt(int cap) {
 	return (rnd() % cap) + 1;
 }
 
+int d0() {
+	return 0;
+}
+
 int d4() {
 	return randInt(4);
 }
 
 int d6() {
 	return randInt(6);
+}
+
+int twod6() {
+	return d6() + d6();
 }
 
 int d8() {

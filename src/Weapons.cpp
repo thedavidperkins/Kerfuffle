@@ -2,44 +2,85 @@
 
 #include "Weapons.h"
 
+std::string gWeaponNames[] = {
+	"CLUB",
+	"DAGGER",
+	"GREATCLUB",
+	"HANDAXE",
+	"JAVELIN",
+	"LIGHT_HAMMER",
+	"MACE",
+	"QUARTERSTAFF",
+	"SICKLE",
+	"SPEAR",
+	"LIGHT_CROSSBOW",
+	"DART",
+	"SHORTBOW",
+	"SLING",
+	"BATTLEAXE",
+	"FLAIL",
+	"GLAIVE",
+	"GREATAXE",
+	"GREATSWORD",
+	"HALBERD",
+	"LANCE",
+	"LONGSWORD",
+	"MAUL",
+	"MORNINGSTAR",
+	"PIKE",
+	"RAPIER",
+	"SCIMITAR",
+	"SHORTSWORD",
+	"TRIDENT",
+	"WAR_PICK",
+	"WARHAMMMER",
+	"WHIP",
+	"BLOWGUN",
+	"HAND_CROSSBOW",
+	"HEAVY_CROSSBOW",
+	"LONGBOW",
+	"NET",
+	"UNARMED"
+};
+
 WEAPON_PROPS gWeaponProps[] = {
-	LIGHT,															//CLUB
-	FINESSE | LIGHT | THROWN,										//DAGGER
-	TWO_HANDED,														//GREATCLUB
-	LIGHT | THROWN,													//HANDAXE
-	THROWN,															//JAVELIN
-	LIGHT | THROWN,													//LIGHT_HAMMER
-	0,																//MACE
-	VERSATILE,														//QUARTERSTAFF
-	LIGHT,															//SICKLE
-	VERSATILE | THROWN,												//SPEAR
-	AMMUNITION | RANGED | LOADING | TWO_HANDED,						//LIGHT_CROSSBOW
-	RANGED | FINESSE | THROWN,										//DART
-	AMMUNITION | RANGED | TWO_HANDED,								//SHORTBOW
-	AMMUNITION | RANGED,											//SLING
-	VERSATILE | MARTIAL,											//BATTLEAXE
-	MARTIAL,														//FLAIL
-	TWO_HANDED | MARTIAL | HEAVY | REACH,							//GLAIVE
-	TWO_HANDED | MARTIAL | HEAVY,									//GREATAXE
-	TWO_HANDED | MARTIAL | HEAVY,									//GREATSWORD
-	TWO_HANDED | MARTIAL | HEAVY | REACH,							//HALBERD
-	MARTIAL | REACH | SPECIAL,										//LANCE
-	VERSATILE | MARTIAL,											//LONGSWORD
-	TWO_HANDED | MARTIAL | HEAVY,									//MAUL
-	MARTIAL,														//MORNINGSTAR
-	TWO_HANDED | MARTIAL | HEAVY | REACH,							//PIKE
-	MARTIAL | FINESSE,												//RAPIER
-	MARTIAL | FINESSE | LIGHT,										//SCIMITAR
-	MARTIAL | FINESSE | LIGHT,										//SHORTSWORD
-	VERSATILE | MARTIAL | THROWN,									//TRIDENT
-	MARTIAL,														//WAR_PICK
-	VERSATILE | MARTIAL,											//WARHAMMMER
-	MARTIAL | FINESSE | REACH,										//WHIP
-	AMMUNITION | RANGED | MARTIAL | LOADING,						//BLOWGUN
-	AMMUNITION | RANGED | MARTIAL | LIGHT | LOADING,				//HAND_CROSSBOW
-	AMMUNITION | RANGED | MARTIAL | HEAVY | LOADING | TWO_HANDED,	//HEAVY_CROSSBOW
-	AMMUNITION | RANGED | MARTIAL | HEAVY | TWO_HANDED,				//LONGBOW
-	MARTIAL | RANGED | SPECIAL | THROWN,							//NET
+	MELEE | SIMPLE | LIGHT,											//CLUB
+	MELEE | SIMPLE | FINESSE | LIGHT | THROWN,						//DAGGER
+	MELEE | SIMPLE | TWO_HANDED,									//GREATCLUB
+	MELEE | SIMPLE | LIGHT | THROWN,								//HANDAXE
+	MELEE | SIMPLE | THROWN,										//JAVELIN
+	MELEE | SIMPLE | LIGHT | THROWN,								//LIGHT_HAMMER
+	MELEE | SIMPLE,													//MACE
+	MELEE | SIMPLE | VERSATILE,										//QUARTERSTAFF
+	MELEE | SIMPLE | LIGHT,											//SICKLE
+	MELEE | SIMPLE | THROWN | VERSATILE,							//SPEAR
+	RANGED | SIMPLE | AMMUNITION | LOADING | TWO_HANDED,			//LIGHT_CROSSBOW
+	RANGED | SIMPLE | FINESSE | THROWN,								//DART
+	RANGED | SIMPLE | AMMUNITION | TWO_HANDED,						//SHORTBOW
+	RANGED | SIMPLE | AMMUNITION,									//SLING
+	MELEE | MARTIAL | VERSATILE,									//BATTLEAXE
+	MELEE | MARTIAL,												//FLAIL
+	MELEE | MARTIAL | HEAVY | REACH | TWO_HANDED,					//GLAIVE
+	MELEE | MARTIAL | HEAVY | TWO_HANDED,							//GREATAXE
+	MELEE | MARTIAL | HEAVY | TWO_HANDED,							//GREATSWORD
+	MELEE | MARTIAL | HEAVY | REACH | TWO_HANDED,					//HALBERD
+	MELEE | MARTIAL | REACH | SPECIAL,								//LANCE
+	MELEE | MARTIAL | VERSATILE,									//LONGSWORD
+	MELEE | MARTIAL | HEAVY | TWO_HANDED,							//MAUL
+	MELEE | MARTIAL,												//MORNINGSTAR
+	MELEE | MARTIAL | HEAVY | REACH | TWO_HANDED,					//PIKE
+	MELEE | MARTIAL | FINESSE,										//RAPIER
+	MELEE | MARTIAL | FINESSE | LIGHT,								//SCIMITAR
+	MELEE | MARTIAL | FINESSE | LIGHT,								//SHORTSWORD
+	MELEE | MARTIAL | THROWN | VERSATILE,							//TRIDENT
+	MELEE | MARTIAL,												//WAR_PICK
+	MELEE | MARTIAL | VERSATILE,									//WARHAMMMER
+	MELEE | MARTIAL | FINESSE | REACH,								//WHIP
+	RANGED | MARTIAL | AMMUNITION | LOADING,						//BLOWGUN
+	RANGED | MARTIAL | AMMUNITION | LIGHT | LOADING,				//HAND_CROSSBOW
+	RANGED | MARTIAL | AMMUNITION | HEAVY | LOADING | TWO_HANDED,	//HEAVY_CROSSBOW
+	RANGED | MARTIAL | AMMUNITION | HEAVY | TWO_HANDED,				//LONGBOW
+	RANGED | MARTIAL | SPECIAL | THROWN,							//NET
 	0																//UNARMED
 };
 
@@ -252,4 +293,99 @@ WEAPON_TYPE mostDamage(std::vector<WEAPON_TYPE>& typeList) {
 		ret = mostDamage(ret, typeList[iter]);
 	}
 	return ret;
+}
+
+bool weaponFromString(const std::string& wepName, WEAPON_TYPE& wep) {
+	for (wep = CLUB; wep != N_WEAPON_TYPE; wep = (WEAPON_TYPE)(wep + 1)) {
+		if (wepName == gWeaponNames[wep]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool propFromString(const std::string& propName, WEAPON_PROPS_BITS& bit) {
+	if (propName == "MELEE") {
+		bit = MELEE;
+	}
+	else if (propName == "RANGED") {
+		bit = RANGED;
+	}
+	else if (propName == "SIMPLE") {
+		bit = SIMPLE;
+	}
+	else if (propName == "MARTIAL") {
+		bit = MARTIAL;
+	}
+	else if (propName == "AMMUNITION") {
+		bit = AMMUNITION;
+	}
+	else if (propName == "FINESSE") {
+		bit = FINESSE;
+	}
+	else if (propName == "HEAVY") {
+		bit = HEAVY;
+	}
+	else if (propName == "LIGHT") {
+		bit = LIGHT;
+	}
+	else if (propName == "LOADING") {
+		bit = LOADING;
+	}
+	else if (propName == "REACH") {
+		bit = REACH;
+	}
+	else if (propName == "SPECIAL") {
+		bit = SPECIAL;
+	}
+	else if (propName == "THROWN") {
+		bit = THROWN;
+	}
+	else if (propName == "TWO_HANDED") {
+		bit = TWO_HANDED;
+	}
+	else if (propName == "VERSATILE") {
+		bit = VERSATILE;
+	}
+	else if (propName == "SILVERED") {
+		bit = SILVERED;
+	}
+	else {
+		return false;
+	}
+	return true;
+}
+
+bool dmgTypeFromString(const std::string& typeName, DMG_TYPE& type) {
+	if (typeName == "PIERCING") {
+		type = PIERCING;
+	}
+	else if (typeName == "SLASHING") {
+		type = SLASHING;
+	}
+	else if (typeName == "BLUDGEONING") {
+		type = BLUDGEONING;
+	}
+	else if (typeName == "FORCE") {
+		type = FORCE;
+	}
+	else if (typeName == "NECROTIC") {
+		type = NECROTIC;
+	}
+	else if (typeName == "POISON") {
+		type = POISON;
+	}
+	else if (typeName == "FIRE") {
+		type = FIRE;
+	}
+	else if (typeName == "FROST") {
+		type = FROST;
+	}
+	else if (typeName == "RADIANT") {
+		type = RADIANT;
+	}
+	else {
+		return false;
+	}
+	return true;
 }

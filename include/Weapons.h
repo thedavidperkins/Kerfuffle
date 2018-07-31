@@ -55,30 +55,38 @@ enum WEAPON_TYPE {
 	HEAVY_CROSSBOW,
 	LONGBOW,
 	NET,
-	UNARMED
+	UNARMED,
+	N_WEAPON_TYPE
 };
 
 enum WEAPON_PROPS_BITS {
-	RANGED = 0x1,		// assume melee if not ranged
-	MARTIAL = 0x2,		// assume simple if not martial
-	AMMUNITION = 0x4,
-	FINESSE = 0x8,
-	HEAVY = 0x10,
-	LIGHT = 0x20,
-	LOADING = 0X40,
-	REACH = 0X80,
-	SPECIAL = 0x100,
-	THROWN = 0x200,
-	TWO_HANDED = 0x400,
-	VERSATILE = 0x800,
-	SILVERED = 0x1000
+	MELEE = 0x1,
+	RANGED = 0x2,
+	SIMPLE = 0x4,
+	MARTIAL = 0x8,
+	AMMUNITION = 0x10,
+	FINESSE = 0x20,
+	HEAVY = 0x40,
+	LIGHT = 0x80,
+	LOADING = 0X100,
+	REACH = 0X200,
+	SPECIAL = 0x400,
+	THROWN = 0x800,
+	TWO_HANDED = 0x1000,
+	VERSATILE = 0x2000,
+	SILVERED = 0x4000	
 };
 typedef unsigned int WEAPON_PROPS;
 
+extern std::string gWeaponNames[];
 extern WEAPON_PROPS gWeaponProps[];
 extern std::function<int(void)> gWeaponDmg[];
 extern std::function<int(void)> gVersWeaponDmg[];
 extern DMG_TYPE gDamageTypes[];
+
+inline bool isLight(WEAPON_TYPE wep) {
+	return gWeaponProps[wep] & LIGHT;
+}
 
 inline bool isThrown(WEAPON_TYPE wep) {
 	return gWeaponProps[wep] & THROWN;
@@ -100,8 +108,15 @@ inline bool isLoading(WEAPON_TYPE wep) {
 	return gWeaponProps[wep] & LOADING;
 }
 
+inline bool isTwoHanded(WEAPON_TYPE wep) {
+	return gWeaponProps[wep] & TWO_HANDED;
+}
+
 WEAPON_TYPE mostDamage(WEAPON_TYPE first, WEAPON_TYPE second);
 WEAPON_TYPE mostDamage(std::vector<WEAPON_TYPE>& typeList);
+bool weaponFromString(const std::string& wepName, WEAPON_TYPE& wep);
+bool propFromString(const std::string& propName, WEAPON_PROPS_BITS& bit);
+bool dmgTypeFromString(const std::string& typeName, DMG_TYPE& type);
 
 #endif//KERF_WEAPONS_H
 

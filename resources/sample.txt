@@ -1,0 +1,51 @@
+PLAYER Ulfgar
+#archetype
+ARCH BRAWLER
+#str dex con wis ntl cha
+ATTR 2 2 3 1 -1 0
+#ac spell_dc
+ACDC 16 0
+#maxHP
+HP 14
+#prof_bonus
+PROFBONUS 2 
+#spell_slots
+SLOTS 0 0 0 0 0 0 0 0 0
+#spellbook
+SPELLS
+ENDSPELLS
+#loadout
+WEAPONS
+BATTLEAXE
+ENDWEAPONS
+#weapon proficiencies
+WPROF
+ENDWPROF
+#weapon property proficiencies
+PPROF
+SIMPLE
+MARTIAL
+ENDPPROF
+ENDPLAYER
+
+
+FOE goblin1
+#archetype
+ARCH BRAWLER
+#str dex con wis ntl cha
+ATTR 2 1 0 -1 -2 -2
+#ac spell_dc
+ACDC 12 0
+#maxHP
+HP 9
+#spell_slots
+SLOTS 0 0 0 0 0 0 0 0 0
+#spellbook
+SPELLS
+ENDSPELLS
+ATK
+ATKBONUS 4
+DMGROLL 1d6+2
+TYPE SLASHING
+ENDATK
+ENDFOE

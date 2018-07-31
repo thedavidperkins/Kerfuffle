@@ -20,9 +20,7 @@ Action* Action::tryAction(ACTION_TYPE t, Creature* user) {
 		return new DisengageAction(user);
 	case DODGE:
 		return new DodgeAction(user);
-	case SPECIAL:
-
 	default:
-		return nullptr;
+		throw std::runtime_error("Error: Action type not supported.");
 	}
 }

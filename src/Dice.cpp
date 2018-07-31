@@ -1,5 +1,7 @@
-#include "Dice.h"
+#include <sstream>
 #include <random>
+
+#include "Dice.h"
 
 static std::mt19937 rnd;
 
@@ -58,4 +60,49 @@ int d20dis() {
 
 int d100() {
 	return randInt(100);
+}
+
+std::function<int(void)> funcFromStr(const std::string& token) {
+	std::stringstream procToken(token);
+	int quant;
+	int die;
+	int offset = 0;
+	std::function<int(void)> dieFunc;
+	procToken >> quant;
+	procToken.get();
+	procToken >> die;
+	procToken.get();
+	if (procToken) procToken >> offset;
+	switch (die) {
+	case 4:
+		dieFunc = d4;
+		break;
+	case 6:
+		dieFunc = d6;
+		break;
+	case 8:
+		dieFunc = d8;
+		break;
+	case 10:
+		dieFunc = d10;
+		break;
+	case 12:
+		dieFunc = d12;
+		break;
+	case 20:
+		dieFunc = d20;
+		break;
+	case 100:
+		dieFunc = d100;
+		break;
+	default:
+		throw std::runtime_error("Error: invalid die requested.");
+	}
+	return [=]() {
+		int res = 0;
+		for (int iter = 0; iter < quant; ++iter) {
+			res += dieFunc() + offset;
+		}
+		return res;
+	};
 }

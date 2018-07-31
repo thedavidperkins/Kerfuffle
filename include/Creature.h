@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <sstream>
 
 #include "Weapons.h"
 #include "Attack.h"
@@ -20,17 +21,7 @@ enum ARCHETYPE {
 
 class Creature {
 public:
-	// ability modifiers
-	int str, dex, con, wis, ntl, cha;
-	
-	// difficulty classes
-	int ac, spell_dc;
-	
-	// initiative -- held during turn order sort in Encounter::fight()
-	int init;
-	
-	// still alive -- dead is for tracking full deadness after death saves or massive attacks
-	bool alive, dead, stable;
+	virtual ~Creature();
 
 	void initRoll();
 	virtual void takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) = 0;
@@ -42,22 +33,56 @@ public:
 	void usedSpell() { m_spellCast--; }
 	void usedAction() { m_actions--; }
 
+	bool isStanding() const { return m_alive; }
+	bool isDead() const { return m_dead; }
+	bool isStable() const { return m_stable; }
+	int getInit() const { return m_init; }
+	int getDex() const { return m_dex; }
+
 	Creature* chooseAttackTarget(const std::vector<Creature*>& enemies);
-	virtual std::vector<Attack*> getAttackList() = 0;
+	virtual void getAttackList(std::vector<Attack*>& atks) = 0;
+	virtual void cleanupAttackList(std::vector<Attack*>& atks) = 0;
 
 	Spell* chooseSpell(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 
 	void setDodge(bool d) { m_dodge = d; }
+
+	virtual Creature* makeCopy() = 0;
 protected:
+	Creature();
+	Creature(const Creature* rhs);
+
+	virtual bool _defineFromStream(std::stringstream& defStream, std::string& errStatus) = 0;
 	void _setSpellPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 	void _setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+
+	std::string m_name;
+
+	// ability modifiers
+	int m_str;
+	int m_dex;
+	int m_con;
+	int m_wis;
+	int m_int;
+	int m_cha;
+
+	// difficulty classes
+	int m_AC;
+	int m_spellDC;
+
+	// initiative -- held during turn order sort in Encounter::fight()
+	int m_init;
+
+	// standing, dead, or on the ground stabilized
+	bool m_alive;
+	bool m_dead;
+	bool m_stable;
 
 	// archetype -- useful for choosing action priority (later on, for now, use universal preset)
 	ARCHETYPE m_archetype;
 
 	// action flags
 	int m_actions;
-	int m_bonus;
 	int m_reaction;
 	int m_spellCast;
 
@@ -79,6 +104,9 @@ protected:
 
 	// dodge
 	bool m_dodge;
+
+	// used by prototype copies to manage used copies
+	Creature* m_copy;
 };
 
 #endif//KERF_CREATURE_H

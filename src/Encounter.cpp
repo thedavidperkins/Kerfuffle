@@ -23,9 +23,10 @@ bool Encounter::_defineFromFile(const std::string& defFile) {
 	std::vector<std::string> fileNames;
 	std::ifstream in(defFile);
 	std::string line;
+	std::getline(in, line);
 	while (in) {
-		std::getline(in, line);
 		fileNames.push_back(line);
+		std::getline(in, line);
 	}
 	for (auto& fl : fileNames) {
 		if(!_procFile(fl)) return false;
@@ -126,11 +127,11 @@ bool Encounter::fight() {
 		c->initRoll();
 	}
 
-	std::sort(turnOrder.begin(), turnOrder.end(), [](Creature* a, Creature* b) {
+	std::sort(turnOrder.begin(), turnOrder.end(), [](Creature* a, Creature* b)->bool {
 		if (a->getInit() == b->getInit()) {
-			return a->getDex() >= b->getDex();
+			return a->getDex() > b->getDex();
 		}
-		return a->getInit() > b->getInit();
+		return (a->getInit() > b->getInit());
 	});
 
 	//=============================================================================

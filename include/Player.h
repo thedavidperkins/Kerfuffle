@@ -53,7 +53,7 @@ private:
 
 	bool m_noMoreAttacks; //used for canceling attacks after using a loaded weapon
 	bool m_firstAttack;
-	int m_nAttacks
+	int m_nAttacks;
 
 	int m_profBonus;
 };

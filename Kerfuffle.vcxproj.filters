@@ -57,6 +57,12 @@
     <ClCompile Include="src\DisengageAction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\OffhandAttack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BonusAction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Creature.h">
@@ -101,5 +107,19 @@
     <ClInclude Include="include\DashAction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BonusAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\OffhandAttack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\defFiles.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="resources\sample.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

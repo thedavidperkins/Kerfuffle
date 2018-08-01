@@ -56,6 +56,7 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 		std::getline(defStream, line);
 		std::stringstream procLine(line);
 		procLine >> token;
+		if (token[0] == '#') continue;
 		if (token == "PLAYER") {
 			procLine >> m_name;
 		}
@@ -106,6 +107,9 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 				>> m_spellSlots[7]
 				>> m_spellSlots[8];
 		}
+		else if (token == "NATTACKS") {
+			procLine >> m_nAttacks;
+		}
 		else if (token == "SPELLS") {
 			std::getline(defStream, line);
 			if (line.find("ENDSPELLS") != 0) {
@@ -120,9 +124,9 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 				end = "ENDWPROF";
 				vecToFill = m_weaponProfs;
 			}
+			std::getline(defStream, line);
 			while (line.find(end) != 0) {
-				std::getline(defStream, line);
-				if (defStream) {
+				if (!defStream) {
 					errStatus = "Error: met premature end of definition stream.";
 					return false;
 				}
@@ -132,12 +136,13 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 					return false;
 				}
 				vecToFill.push_back(wep);
+				std::getline(defStream, line);
 			}
 		}
 		else if (token == "PPROF") {
+			std::getline(defStream, line);
 			while (line.find("ENDPPROF") != 0) {
-				std::getline(defStream, line);
-				if (defStream) {
+				if (!defStream) {
 					errStatus = "Error: met premature end of definition stream.";
 					return false;
 				}
@@ -147,12 +152,15 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 					return false;
 				}
 				m_propProfs |= bit;
+				std::getline(defStream, line);
 			}
 		}
 		else if (token == "ENDPLAYER") {
 			return true;
 		}
 	}
+	errStatus = "Error: no end player flag found.";
+	return false;
 }
 
 Player* Player::makeCopy() {
@@ -309,7 +317,14 @@ void Player::loadOffhandAttack(Attack& atk) {
 }
 
 void Player::getAttackList(std::vector<Attack*>& atks) {
-	atks.clear();
-	for(int iter = 0; iter < m_at)
+	for (int iter = 0; iter < m_nAttacks; ++iter) {
+		atks.push_back(new Attack(this));
+	}
 }
 
+void Player::cleanupAttackList(std::vector<Attack*>& atks) {
+	for (auto& atk : atks) {
+		delete atk;
+	}
+	atks.clear();
+}

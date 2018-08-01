@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\Attack.cpp" />
     <ClCompile Include="src\AttackAction.cpp" />
+    <ClCompile Include="src\BonusAction.cpp" />
     <ClCompile Include="src\Creature.cpp" />
     <ClCompile Include="src\DashAction.cpp" />
     <ClCompile Include="src\Dice.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="src\Foe.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Action.cpp" />
+    <ClCompile Include="src\OffhandAttack.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\SpellAction.cpp" />
     <ClCompile Include="src\Weapons.cpp" />
@@ -38,6 +40,7 @@
     <ClInclude Include="include\Action.h" />
     <ClInclude Include="include\Attack.h" />
     <ClInclude Include="include\AttackAction.h" />
+    <ClInclude Include="include\BonusAction.h" />
     <ClInclude Include="include\Creature.h" />
     <ClInclude Include="include\DashAction.h" />
     <ClInclude Include="include\Dice.h" />
@@ -45,10 +48,15 @@
     <ClInclude Include="include\DodgeAction.h" />
     <ClInclude Include="include\Encounter.h" />
     <ClInclude Include="include\Foe.h" />
+    <ClInclude Include="include\OffhandAttack.h" />
     <ClInclude Include="include\Spell.h" />
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\SpellAction.h" />
     <ClInclude Include="include\Weapons.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\defFiles.txt" />
+    <Text Include="resources\sample.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

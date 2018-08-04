@@ -13,6 +13,14 @@ static int minOf(int a, int b) {
 	return a < b ? a : b;
 }
 
+void getDiceSeed(std::stringstream& strm) {
+	strm << rnd;
+}
+
+void resetDiceSeed(std::stringstream& strm) {
+	strm >> rnd;
+}
+
 // return a random int between 1 and cap inclusive
 int randInt(int cap) {
 	return (rnd() % cap) + 1;
@@ -62,17 +70,17 @@ int d100() {
 	return randInt(100);
 }
 
-std::function<int(void)> funcFromStr(const std::string& token) {
+std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus) {
 	std::stringstream procToken(token);
 	int quant;
 	int die;
-	int offset = 0;
+	dmgBonus = 0;
 	std::function<int(void)> dieFunc;
 	procToken >> quant;
 	procToken.get();
 	procToken >> die;
 	procToken.get();
-	if (procToken) procToken >> offset;
+	if (procToken) procToken >> dmgBonus;
 	switch (die) {
 	case 4:
 		dieFunc = d4;
@@ -101,7 +109,7 @@ std::function<int(void)> funcFromStr(const std::string& token) {
 	return [=]() {
 		int res = 0;
 		for (int iter = 0; iter < quant; ++iter) {
-			res += dieFunc() + offset;
+			res += dieFunc();
 		}
 		return res;
 	};

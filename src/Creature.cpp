@@ -2,14 +2,15 @@
 #include "Creature.h"
 #include "Dice.h"
 #include "Action.h"
+#include "Logger.h"
 
 Creature::Creature() :
 	m_name(),
 	m_str(0),
 	m_dex(0),
 	m_con(0),
-	m_wis(0),
 	m_int(0),
+	m_wis(0),
 	m_cha(0),
 	m_AC(0),
 	m_spellDC(0),
@@ -39,8 +40,8 @@ Creature::Creature(const Creature* rhs) :
 	m_str(rhs->m_str),
 	m_dex(rhs->m_dex),
 	m_con(rhs->m_con),
-	m_wis(rhs->m_wis),
 	m_int(rhs->m_int),
+	m_wis(rhs->m_wis),
 	m_cha(rhs->m_cha),
 	m_AC(rhs->m_AC),
 	m_spellDC(rhs->m_spellDC),
@@ -90,16 +91,21 @@ Creature::~Creature() {
 
 void Creature::initRoll() {
 	m_init = d20() + m_dex;
+	LOG(m_name + " initiative roll: " + std::to_string(m_init));
 }
 
 bool Creature::checkHit(Attack* attack) {
 	if (m_dodge) attack->setDisadvantage(true);
-	return attack->atk() >= m_AC;
+	int crit = 0;
+	int roll = attack->atk();
+	LOG("Target " + m_name + " has AC " + std::to_string(m_AC));
+	return roll >= m_AC;
 }
 
 void Creature::takeDamage(Attack* attack) {
 	// reduce m_tempHP first
-	int diff = m_tempHP - attack->dmg();
+	int roll = attack->dmg();
+	int diff = m_tempHP - roll;
 	if (diff > 0) {
 		m_tempHP = diff;
 	}
@@ -109,9 +115,12 @@ void Creature::takeDamage(Attack* attack) {
 	else {
 		m_HP += diff;
 	}
+	LOG(m_name + " takes " + std::to_string(roll) + " " + dmgTypeToString(attack->dmgType()) + " damage.");
+	LOG(m_name + " is left with " + std::to_string(m_HP) + " hit points.");
 }
 
 void Creature::takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) {
+	LOG(m_name + " taking turn: ");
 	m_actions = m_reaction = 1;
 	m_dodge = false;
 	_setActionPriorities(friends, enemies);

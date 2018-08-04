@@ -62,7 +62,7 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 			}
 		}
 		else if (token == "ATTR") {
-			procLine >> m_str >> m_dex >> m_con >> m_wis >> m_int >> m_cha;
+			procLine >> m_str >> m_dex >> m_con >> m_int >> m_wis >> m_cha;
 		}
 		else if (token == "ACDC") {
 			procLine >> m_AC >> m_spellDC;
@@ -92,8 +92,8 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 		}
 		else if (token == "ATK") {
 			int atkBonus = 0;
-			int dmgBonus = 0;
 			std::function<int(void)> dmgRoll = d0;
+			std::string dmgString;
 			DMG_TYPE type = BLUDGEONING;
 			while (line.find("ENDATK") != 0) {
 				std::getline(defStream, line);
@@ -108,8 +108,7 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 					procLine >> atkBonus;
 				}
 				else if (token == "DMGROLL") {
-					procLine >> token;
-					dmgRoll = funcFromStr(token);
+					procLine >> dmgString;
 				}
 				else if (token == "TYPE") {
 					procLine >> token;
@@ -120,7 +119,7 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 				}
 				else if (token == "ENDATK") {
 					Attack* atk = new Attack(this);
-					atk->load(atkBonus, dmgRoll, type);
+					atk->load(type, atkBonus, dmgString);
 					m_attacks.push_back(atk);
 				}
 			}

@@ -4,12 +4,14 @@
 #include <sstream>
 
 #include "Creature.h"
+#include "Loadout.h"
 
 class BonusAction;
 
 class Player : public Creature {
 public:
 	Player(std::stringstream& defStream);
+	virtual ~Player();
 
 	virtual void takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) override;
 	virtual void takeDamage(Attack* attack) override;
@@ -19,9 +21,11 @@ public:
 	virtual void cleanupAttackList(std::vector<Attack*>& atks) override;
 	
 	void loadOffhandAttack(Attack& atk);
-	int dmgBonus(WEAPON_TYPE weapon);
-	int atkBonus(WEAPON_TYPE weapon);
 	void usedBonusAction() { m_bonus--; }
+
+	int nAttacks() const { return m_nAttacks; }
+
+	int getProfBonus() { return m_profBonus; }
 
 	virtual Player* makeCopy();
 private:
@@ -29,27 +33,30 @@ private:
 	Player(const Player* rhs);
 	Player();
 
-	bool _isProficient(WEAPON_TYPE weapon);
+	bool _tryInsertLoadout(Loadout* l);
 	int _getAbltyMod(WEAPON_TYPE weapon);
-	WEAPON_TYPE _chooseWeaponForAttack();
+	void _checkLoadoutSwap();
+	void _populateLoadouts(
+		const std::vector<WEAPON_TYPE>& weps,
+		const std::vector<WEAPON_TYPE>& profs,
+		WEAPON_PROPS propProfs,
+		bool dual,
+		bool shield
+	);
+	void _sortLoadouts();
+	void _cleanupBonusActions();
+
+	int m_level;
 
 	// bonus actions
 	int m_bonus;
 	std::vector<BonusAction*> m_bonusActions;
 
 	// weapons and gear
-	std::vector<WEAPON_TYPE> m_weaponsOwned;
-	std::vector<WEAPON_TYPE> m_weaponProfs;
-	WEAPON_TYPE m_offhandWeapon;
-	WEAPON_PROPS m_propProfs;
-	bool m_hasShield; // only used for weapon choices/abilities -- ac boost should be rolled into total ac (no swapping out, for now)
-	bool m_hasOffhandWeapon;
-	bool m_hasSpecialWeapon;
-	bool m_hasOffhandSpecialWeapon;
-	Attack m_specialWeaponAttack;
-	Attack m_specialOffhandWeaponAttack;
-	WEAPON_PROPS m_specialWeaponProps;
-	WEAPON_PROPS m_specialOffhandWeaponProps;
+	LOADOUT_PRIORITY m_loadPriority;
+	std::vector<Loadout*> m_loadouts;
+	int m_chosenLoadout;
+	bool m_swappedLoadout;
 
 	bool m_noMoreAttacks; //used for canceling attacks after using a loaded weapon
 	bool m_firstAttack;

@@ -1,6 +1,7 @@
 #include "AttackAction.h"
 #include "Attack.h"
 #include "Creature.h"
+#include "Logger.h"
 
 AttackAction::AttackAction(Creature* user) : Action(ATTACK, user) {}
 
@@ -15,6 +16,7 @@ bool AttackAction::isUsable(const std::vector<Creature*>& friends, const std::ve
 }
 
 void AttackAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) {
+	LOG(m_user->getName() + " attacks.");
 	m_user->usedAction();
 	std::vector<Attack*> atks;
 	m_user->getAttackList(atks);
@@ -28,6 +30,9 @@ void AttackAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*
 		}
 		if (target->checkHit(curAttack)) {
 			target->takeDamage(curAttack);
+		}
+		else {
+			LOG(m_user->getName() + " misses!");
 		}
 	}
 	m_user->cleanupAttackList(atks);

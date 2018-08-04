@@ -6,7 +6,7 @@
 #include "Dice.h"
 
 enum DMG_TYPE {
-	PIERCING,
+	PIERCING = 0,
 	SLASHING,
 	BLUDGEONING,
 	FORCE,
@@ -84,6 +84,8 @@ extern std::function<int(void)> gWeaponDmg[];
 extern std::function<int(void)> gVersWeaponDmg[];
 extern DMG_TYPE gDamageTypes[];
 
+extern std::string gDamageTypeNames[];
+
 inline bool isLight(WEAPON_TYPE wep) {
 	return gWeaponProps[wep] & LIGHT;
 }
@@ -112,11 +114,15 @@ inline bool isTwoHanded(WEAPON_TYPE wep) {
 	return gWeaponProps[wep] & TWO_HANDED;
 }
 
+int maxDamage(WEAPON_TYPE wep);
+int minDamage(WEAPON_TYPE wep);
 WEAPON_TYPE mostDamage(WEAPON_TYPE first, WEAPON_TYPE second);
 WEAPON_TYPE mostDamage(std::vector<WEAPON_TYPE>& typeList);
 bool weaponFromString(const std::string& wepName, WEAPON_TYPE& wep);
 bool propFromString(const std::string& propName, WEAPON_PROPS_BITS& bit);
 bool dmgTypeFromString(const std::string& typeName, DMG_TYPE& type);
+std::string dmgTypeToString(DMG_TYPE type);
+std::string wepDmgString(WEAPON_TYPE wep);
 
 #endif//KERF_WEAPONS_H
 

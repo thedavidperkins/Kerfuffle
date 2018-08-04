@@ -37,7 +37,13 @@ public:
 	bool isDead() const { return m_dead; }
 	bool isStable() const { return m_stable; }
 	int getInit() const { return m_init; }
+	int getStr() const { return m_str; }
 	int getDex() const { return m_dex; }
+	int getCon() const { return m_con; }
+	int getInt() const { return m_int; }
+	int getWis() const { return m_wis; }
+	int getCha() const { return m_cha; }
+	std::string getName() const { return m_name; }
 
 	Creature* chooseAttackTarget(const std::vector<Creature*>& enemies);
 	virtual void getAttackList(std::vector<Attack*>& atks) = 0;
@@ -62,8 +68,8 @@ protected:
 	int m_str;
 	int m_dex;
 	int m_con;
-	int m_wis;
 	int m_int;
+	int m_wis;
 	int m_cha;
 
 	// difficulty classes

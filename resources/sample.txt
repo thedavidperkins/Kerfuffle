@@ -1,8 +1,8 @@
-PLAYER Ulfgar
+PLAYER Ulfgar 1
 #archetype
 ARCH BRAWLER
-#str dex con wis ntl cha
-ATTR 2 2 3 1 -1 0
+#str dex con ntl wis cha
+ATTR 2 2 3 -1 1 0
 #ac spell_dc
 ACDC 16 0
 #maxHP
@@ -15,6 +15,7 @@ SLOTS 0 0 0 0 0 0 0 0 0
 SPELLS
 ENDSPELLS
 #loadout
+LOADOUT
 WEAPONS
 BATTLEAXE
 ENDWEAPONS
@@ -26,13 +27,14 @@ PPROF
 SIMPLE
 MARTIAL
 ENDPPROF
+ENDLOADOUT
 ENDPLAYER
 
-PLAYER Ulfgar2
+PLAYER Ulfgar2 1
 #archetype
 ARCH BRAWLER
-#str dex con wis ntl cha
-ATTR 2 2 3 1 -1 0
+#str dex con ntl wis cha
+ATTR 2 2 3 -1 1 0
 #ac spell_dc
 ACDC 16 0
 #maxHP
@@ -45,6 +47,7 @@ SLOTS 0 0 0 0 0 0 0 0 0
 SPELLS
 ENDSPELLS
 #loadout
+LOADOUT
 WEAPONS
 BATTLEAXE
 ENDWEAPONS
@@ -56,13 +59,14 @@ PPROF
 SIMPLE
 MARTIAL
 ENDPPROF
+ENDLOADOUT
 ENDPLAYER
 
 FOE goblin1
 #archetype
 ARCH BRAWLER
-#str dex con wis ntl cha
-ATTR 2 1 0 -1 -2 -2
+#str dex con ntl wis cha
+ATTR 2 1 0 -2 -1 -2
 #ac spell_dc
 ACDC 12 0
 #maxHP
@@ -82,8 +86,8 @@ ENDFOE
 FOE goblin2
 #archetype
 ARCH BRAWLER
-#str dex con wis ntl cha
-ATTR 2 1 0 -1 -2 -2
+#str dex con ntl wis cha
+ATTR 2 1 0 -2 -1 -2
 #ac spell_dc
 ACDC 12 0
 #maxHP
@@ -103,8 +107,8 @@ ENDFOE
 FOE goblin3
 #archetype
 ARCH BRAWLER
-#str dex con wis ntl cha
-ATTR 2 1 0 -1 -2 -2
+#str dex con ntl wis cha
+ATTR 2 1 0 -2 -1 -2
 #ac spell_dc
 ACDC 12 0
 #maxHP

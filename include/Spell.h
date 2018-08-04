@@ -28,9 +28,12 @@ public:
 	int lvl() const { return m_lvl; }
 	SPELL_PRIORITY priority() const { return m_priority; }
 
+	std::string getName() const { return m_name; }
+
 	virtual void cast() = 0;
 	virtual bool identifyTargets(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies) = 0;
 protected:
+	std::string m_name;
 	Creature* m_user;
 	std::vector<Creature*> m_targets;
 	int m_lvl;

@@ -1,0 +1,50 @@
+#player name and level
+PLAYER Milo 1
+
+#archetype
+ARCH ROGUE
+
+#str dex con ntl wis cha
+ATTR 1 3 1 0 -1 2
+
+#ac spell_dc
+ACDC 14 0
+
+#maxHP
+HP 9
+
+#prof_bonus
+PROFBONUS 2
+
+#spell_slots
+SLOTS 0 0 0 0 0 0 0 0 0
+
+#spellbook
+SPELLS
+
+ENDSPELLS
+
+#loadout
+LOADOUT
+WEAPONS
+	DAGGER
+	DAGGER
+	SHORTSWORD
+	SHORTSWORD
+ENDWEAPONS
+
+#weapon proficiencies
+WPROF
+	HAND_CROSSBOW
+	LONGSWORD
+	RAPIER
+	SHORTSWORD
+ENDWPROF
+
+#weapon property proficiencies
+PPROF
+	SIMPLE
+ENDPPROF
+ENDLOADOUT
+
+ENDPLAYER

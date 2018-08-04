@@ -43,6 +43,18 @@ std::string gWeaponNames[] = {
 	"UNARMED"
 };
 
+std::string gDamageTypeNames[] = {
+	"PIERCING",
+	"SLASHING",
+	"BLUDGEONING",
+	"FORCE",
+	"NECROTIC",
+	"POISON",
+	"FIRE",
+	"FROST",
+	"RADIANT"
+};
+
 WEAPON_PROPS gWeaponProps[] = {
 	MELEE | SIMPLE | LIGHT,											//CLUB
 	MELEE | SIMPLE | FINESSE | LIGHT | THROWN,						//DAGGER
@@ -207,7 +219,69 @@ DMG_TYPE gDamageTypes[] = {
 	BLUDGEONING		//UNARMED
 };
 
-static int maxDamage(WEAPON_TYPE wep) {
+std::string wepDmgString(WEAPON_TYPE wep) {
+	switch (wep)
+	{
+	case NET:
+		return "0";
+		break;
+	case BLOWGUN:
+		return "1";
+		break;
+	case CLUB:
+	case DAGGER:
+	case LIGHT_HAMMER:
+	case SICKLE:
+	case DART:
+	case SLING:
+	case WHIP:
+	case UNARMED:
+		return "1d4";
+		break;
+	case HANDAXE:
+	case JAVELIN:
+	case MACE:
+	case QUARTERSTAFF:
+	case SPEAR:
+	case SHORTBOW:
+	case SCIMITAR:
+	case SHORTSWORD:
+	case TRIDENT:
+	case HAND_CROSSBOW:
+		return "1d6";
+		break;
+	case GREATCLUB:
+	case LIGHT_CROSSBOW:
+	case BATTLEAXE:
+	case FLAIL:
+	case LONGSWORD:
+	case MORNINGSTAR:
+	case RAPIER:
+	case WAR_PICK:
+	case WARHAMMMER:
+	case LONGBOW:
+		return "1d8";
+		break;
+	case GLAIVE:
+	case HALBERD:
+	case PIKE:
+	case HEAVY_CROSSBOW:
+		return "1d10";
+		break;
+	case GREATAXE:
+	case LANCE:
+		return "1d12";
+		break;
+	case GREATSWORD:
+	case MAUL:
+		return "2d6";
+		break;
+	default:
+		throw std::runtime_error("Weapon type not recognized.");
+	}
+}
+
+int maxDamage(WEAPON_TYPE wep) {
 	switch (wep)
 	{
 	case NET:
@@ -267,7 +341,7 @@ static int maxDamage(WEAPON_TYPE wep) {
 	}
 }
 
-static int minDamage(WEAPON_TYPE wep) {
+int minDamage(WEAPON_TYPE wep) {
 	if (wep == NET) {
 		return 0;
 	}
@@ -388,4 +462,8 @@ bool dmgTypeFromString(const std::string& typeName, DMG_TYPE& type) {
 		return false;
 	}
 	return true;
+}
+
+std::string dmgTypeToString(DMG_TYPE type) {
+	return gDamageTypeNames[type];
 }

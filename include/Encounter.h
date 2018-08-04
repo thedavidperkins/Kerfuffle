@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 class Creature;
 
@@ -10,7 +11,7 @@ class Encounter {
 public:
 	Encounter(const std::string& defFile);
 	~Encounter();
-	bool fight();
+	bool fight(bool write = false);
 private:
 	bool _defineFromFile(const std::string& defFile);
 	bool _procFile(const std::string& fileName);

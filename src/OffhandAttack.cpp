@@ -3,7 +3,7 @@
 #include "Attack.h"
 #include "Player.h"
 
-OffhandAttack::OffhandAttack(Creature* user) : BonusAction(user, END_OF_TURN, true) {}
+OffhandAttack::OffhandAttack(Creature* user) : BonusAction(user, END_OF_TURN, false) {}
 
 bool OffhandAttack::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
 	m_target = m_user->chooseAttackTarget(enemies);

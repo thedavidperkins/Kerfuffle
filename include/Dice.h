@@ -4,6 +4,9 @@
 #include <functional>
 #include <string>
 
+void getDiceSeed(std::stringstream& strm);
+void resetDiceSeed(std::stringstream& strm);
+
 int randInt(int cap);
 int d0(); // stand-in function for when no damage is guaranteed
 int d4();
@@ -16,7 +19,7 @@ int d20adv();
 int d20dis();
 int d100();
 
-std::function<int(void)> funcFromStr(const std::string& token);
+std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus);
 
 #endif//KERF_DICE_H
 

@@ -1,12 +1,13 @@
 #include <algorithm>
-#include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "Encounter.h"
 #include "Creature.h"
 #include "Dice.h"
 #include "Player.h"
 #include "Foe.h"
+#include "Logger.h"
 
 Encounter::Encounter(const std::string& defFile) :
 	m_party(),
@@ -102,18 +103,26 @@ bool Encounter::_foesAlive() {
 	for (auto& f : m_foes) {
 		if (f->isStanding()) return true;
 	}
+	std::cout << "All foes have died." << std::endl;
 	return false;
 }
 
 bool Encounter::_partyAlive() {
 	for (auto& p : m_party) {
-		if (p->isStanding()) return true;
+		if (p->isDead()) {
+			std::cout << p->getName() << " has died." << std::endl;
+			return false;
+		}
 	}
-	return false;
+	return true;
 }
 
-bool Encounter::fight() {
+bool Encounter::fight(bool write) {
 	_populateTeams();
+	if (write) LOG.openFile("EncLog.txt");
+	LOG("==============================================================");
+	LOG("                    FIGHT START                               ");
+	LOG("==============================================================");
 
 	int timeOut = 1000; // prevent infinite fights 
 	//=============================================================================
@@ -138,12 +147,16 @@ bool Encounter::fight() {
 	// Main fight loop -- go until all foes or all party are dead
 	//=============================================================================
 	int counter = 0;
+	bool ret = false;
 	while (counter++ < timeOut) {
+		LOG("- - - - - - - - - - - - - - - - - - - - - - - - - - -");
 		for (auto& cur : turnOrder) {
 			if (cur->isStanding()) {
+				LOG("++++++++++++++++++++++++++");
 				cur->takeTurn(m_party, m_foes);
 			}
 			else if (!cur->isDead() && !cur->isStable()) {
+				LOG("++++++++++++++++++++++++++");
 				if (cur->deathCheck()) {
 					cur->takeTurn(m_party, m_foes);
 				}
@@ -151,9 +164,20 @@ bool Encounter::fight() {
 		}
 
 		// Check for end of fight; return true if party wins or false if they lose
-		if (!_partyAlive()) return false;
-		if (!_foesAlive()) return true;
+		if (!_partyAlive()) {
+			ret = false;
+			break;
+		}
+		if (!_foesAlive()) {
+			ret = true;
+			break;
+		}
 	}
 
-	return false;
+	LOG("==============================================================");
+	LOG(std::string("                    FIGHT END - ") + (ret ? "PLAYERS WIN" : "FOES WIN"));
+	LOG("==============================================================");
+
+	if (write) LOG.closeFile();
+	return ret;
 }

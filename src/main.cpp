@@ -10,12 +10,11 @@ int main() {
 	try {
 		Encounter e("resources\\defFiles.txt");
 		int wincount = 0;
-		int total = 10000;
+		int total = 100;
 		bool write = true;
 		for (int iter = 0; iter < total; ++iter) {
-			if (e.fight(write)) {
+			if (e.fight(iter)) {
 				++wincount;
-				write = false;
 			}
 		}
 		std::cout << "Win percentage: " << (double)wincount / (double)total << std::endl;

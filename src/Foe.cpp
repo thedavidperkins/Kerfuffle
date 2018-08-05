@@ -62,7 +62,13 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 			}
 		}
 		else if (token == "ATTR") {
-			procLine >> m_str >> m_dex >> m_con >> m_int >> m_wis >> m_cha;
+			procLine
+				>> m_abilityMods[STR]
+				>> m_abilityMods[DEX]
+				>> m_abilityMods[CON]
+				>> m_abilityMods[INT]
+				>> m_abilityMods[WIS]
+				>> m_abilityMods[CHA];
 		}
 		else if (token == "ACDC") {
 			procLine >> m_AC >> m_spellDC;

@@ -37,6 +37,7 @@ public:
 	std::function<int(void)> getDmgDice(bool dual = false) const;
 	DMG_TYPE getDmgType(bool dual = false) const;
 	WEAPON_TYPE getWepType(bool dual = false) const;
+	bool usingTwoHanded() const { return m_usingTwoHanded; }
 
 	// for priority sorting
 	int getScore(LOADOUT_PRIORITY priority) const;

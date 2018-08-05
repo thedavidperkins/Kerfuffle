@@ -7,6 +7,13 @@
 void getDiceSeed(std::stringstream& strm);
 void resetDiceSeed(std::stringstream& strm);
 
+enum ROLL_TYPE {
+	R_ATTACK_ROLL,
+	R_ABILITY_CHECK,
+	R_SAVING_THROW,
+	R_OTHER
+};
+
 int randInt(int cap);
 int d0(); // stand-in function for when no damage is guaranteed
 int d4();
@@ -15,8 +22,6 @@ int d8();
 int d10();
 int d12();
 int d20();
-int d20adv();
-int d20dis();
 int d100();
 
 std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus);

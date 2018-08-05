@@ -23,7 +23,8 @@ void Attack::load(Loadout* loadout, bool dual) {
 	m_atkBonus = loadout->getAtkBonus(dual);
 	m_dmgDice = loadout->getDmgDice(dual);
 	m_dmgBonus = loadout->getDmgBonus(dual);
-	m_dmgString = wepDmgString(loadout->getWepType(dual));
+	if (loadout->usingTwoHanded()) m_dmgString = wepDmgStringVersatile(loadout->getWepType());
+	else m_dmgString = wepDmgString(loadout->getWepType(dual));
 	m_type = loadout->getDmgType(dual);
 	m_loaded = true;
 	m_crit = false;
@@ -66,13 +67,13 @@ void Attack::unload() {
 int Attack::atk() {
 	int ret;
 	if (m_advantage && !m_disadvantage) {
-		ret = d20adv();
+		ret = m_agent->rolld20Adv(R_ATTACK_ROLL);
 	}
 	else if (!m_advantage && m_disadvantage) {
-		ret = d20dis();
+		ret = m_agent->rolld20Dis(R_ATTACK_ROLL);
 	}
 	else {
-		ret = d20();
+		ret = m_agent->rolld20(R_ATTACK_ROLL);
 	}
 	if (ret == 1) {
 		LOG(m_agent->getName() + " attacked and rolled a natural 1.");
@@ -87,7 +88,8 @@ int Attack::atk() {
 	return ret;
 }
 
-int Attack::dmg() {
+int Attack::dmg(Creature* target) {
+
 	int ret = m_dmgDice();
 	LOG(m_agent->getName() + " rolls the dice in " + m_dmgString + " and gets " + std::to_string(ret));
 	if (m_crit) {
@@ -97,6 +99,15 @@ int Attack::dmg() {
 		m_crit = false;
 	}
 	LOG(m_agent->getName() + " adds damage bonus " + std::to_string(m_dmgBonus));
+
+	// Check for sneak attack
+	if (m_agent->getFeatures() & F_SNEAK_ATTACK) {
+		auto sat = m_agent->getTrkr<SneakAttackTrkr>();
+		if (sat->isUsable(target)) {
+			ret += sat->use();
+		}
+	}
+
 	return ret + m_dmgBonus;
 }
 

@@ -16,7 +16,7 @@ public:
 	void load(const Attack& rhs);
 	void unload();
 	int atk();
-	int dmg();
+	int dmg(Creature* target);
 	DMG_TYPE dmgType();
 	bool isLoaded() { return m_loaded; }
 	void setDisadvantage(bool dis) { m_disadvantage = dis; }

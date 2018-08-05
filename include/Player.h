@@ -24,6 +24,7 @@ public:
 	void usedBonusAction() { m_bonus--; }
 
 	int nAttacks() const { return m_nAttacks; }
+	int getLvl() const { return m_level; }
 
 	int getProfBonus() { return m_profBonus; }
 

@@ -123,6 +123,7 @@ bool propFromString(const std::string& propName, WEAPON_PROPS_BITS& bit);
 bool dmgTypeFromString(const std::string& typeName, DMG_TYPE& type);
 std::string dmgTypeToString(DMG_TYPE type);
 std::string wepDmgString(WEAPON_TYPE wep);
+std::string wepDmgStringVersatile(WEAPON_TYPE wep);
 
 #endif//KERF_WEAPONS_H
 

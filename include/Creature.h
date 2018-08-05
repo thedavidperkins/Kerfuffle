@@ -4,12 +4,24 @@
 #include <vector>
 #include <functional>
 #include <sstream>
+#include <map>
 
 #include "Weapons.h"
 #include "Attack.h"
 #include "Spell.h"
+#include "Features.h"
 
 class Attack;
+
+enum ABILITY_SCORES {
+	STR = 0,
+	DEX,
+	CON,
+	INT,
+	WIS,
+	CHA,
+	N_ABILITY_SCORES
+};
 
 enum ARCHETYPE {
 	BRAWLER,
@@ -18,6 +30,11 @@ enum ARCHETYPE {
 	DAMAGE_CASTER,
 	SUPPORT_CASTER
 };
+
+enum CONDITION_BITS {
+	C_FRIGHTENED
+};
+typedef unsigned int CONDITION;
 
 class Creature {
 public:
@@ -37,12 +54,9 @@ public:
 	bool isDead() const { return m_dead; }
 	bool isStable() const { return m_stable; }
 	int getInit() const { return m_init; }
-	int getStr() const { return m_str; }
-	int getDex() const { return m_dex; }
-	int getCon() const { return m_con; }
-	int getInt() const { return m_int; }
-	int getWis() const { return m_wis; }
-	int getCha() const { return m_cha; }
+	int getAMod(ABILITY_SCORES sc) const { return m_abilityMods[sc]; }
+	bool hadAdvantage() const { return m_hadAdvantage; }
+
 	std::string getName() const { return m_name; }
 
 	Creature* chooseAttackTarget(const std::vector<Creature*>& enemies);
@@ -54,23 +68,36 @@ public:
 	void setDodge(bool d) { m_dodge = d; }
 
 	virtual Creature* makeCopy() = 0;
+
+	int rolld20(ROLL_TYPE rollType); // Allow player features to intervene on rolls
+	int rolld20Adv(ROLL_TYPE rollType); // Allow player features to intervene on rolls
+	int rolld20Dis(ROLL_TYPE rollType); // Allow player features to intervene on rolls
+	int savingThrow(ABILITY_SCORES sc, CONDITION threat = 0);
+
+	FEATURES getFeatures() const { return m_features; }
+
+	template <class T>
+	T* getTrkr() {
+		T* ret = dynamic_cast<T*>(m_ftreTrkrs.at(classBit<T>()));
+		if (ret == nullptr) {
+			throw std::runtime_error("Error in feature tracker cast.");
+		}
+		return ret;
+	}
 protected:
 	Creature();
 	Creature(const Creature* rhs);
 
 	virtual bool _defineFromStream(std::stringstream& defStream, std::string& errStatus) = 0;
+	void _setupFtreTrkrs();
+	void _resetFtreTrkrs();
 	void _setSpellPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 	void _setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 
 	std::string m_name;
 
 	// ability modifiers
-	int m_str;
-	int m_dex;
-	int m_con;
-	int m_int;
-	int m_wis;
-	int m_cha;
+	int m_abilityMods[N_ABILITY_SCORES];
 
 	// difficulty classes
 	int m_AC;
@@ -113,6 +140,16 @@ protected:
 
 	// used by prototype copies to manage used copies
 	Creature* m_copy;
+
+	// Features
+	FEATURES m_features;
+	std::map<FEATURE_BIT, FeatureTrkr*> m_ftreTrkrs;
+
+	// Condition
+	CONDITION m_condition;
+
+	// Miscellaneous state tracking
+	bool m_hadAdvantage;
 };
 
 #endif//KERF_CREATURE_H

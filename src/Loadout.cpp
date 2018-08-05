@@ -21,7 +21,7 @@ Loadout::Loadout(WEAPON_TYPE wep, Player* owner, bool prof, bool shield, WEAPON_
 	m_owner(owner),
 	m_maxDamage((isLoading(wep) ? 1 : owner->nAttacks()) * maxDamage(wep)),
 	m_acBonus(shield ? 2 : 0),
-	m_bonusMaxDamage(maxDamage(dual) / 2),
+	m_bonusMaxDamage(m_dual ? maxDamage(dual) : 0),
 	m_id(counter++)
 {
 	// Determine attack/damage bonus
@@ -62,8 +62,8 @@ Loadout::Loadout(const Loadout* rhs) :
 {}
 
 int Loadout::_getAbltyScore(WEAPON_PROPS props) {
-	int str = m_owner->getStr();
-	int dex = m_owner->getDex();
+	int str = m_owner->getAMod(STR);
+	int dex = m_owner->getAMod(DEX);
 	int abltyScore = str;
 	if ((props & FINESSE) && (dex > str)) {
 		abltyScore = dex;
@@ -106,11 +106,11 @@ int Loadout::getScore(LOADOUT_PRIORITY priority) const {
 	switch (priority)
 	{
 	case MELEE_DAMAGE:
-		return m_maxDamage + m_bonusMaxDamage + 3 * m_atkBonus - 10 * (m_wepProps & RANGED); // strongly weight attack bonus, avoid ranged
+		return 3 * m_maxDamage + 2 * m_bonusMaxDamage + 5 * m_atkBonus - 20 * (m_wepProps & RANGED); // strongly weight attack bonus, avoid ranged
 	case MELEE_DEFENSE:
-		return getScore(MELEE_DAMAGE) + 10 * m_shield; // favor shield use
+		return getScore(MELEE_DAMAGE) + 20 * m_shield; // favor shield use
 	case RANGED_DAMAGE:
-		return m_maxDamage + m_bonusMaxDamage + 3 * m_atkBonus - 10 * (m_wepProps & MELEE); // strongly weight attack bonus, avoid melee
+		return 3 * m_maxDamage + 2 * m_bonusMaxDamage + 5 * m_atkBonus - 20 * (m_wepProps & MELEE); // strongly weight attack bonus, avoid melee
 	default:
 		return 0;
 		break;

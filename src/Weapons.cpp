@@ -219,6 +219,22 @@ DMG_TYPE gDamageTypes[] = {
 	BLUDGEONING		//UNARMED
 };
 
+std::string wepDmgStringVersatile(WEAPON_TYPE wep) {
+	switch (wep)
+	{
+	case QUARTERSTAFF:
+	case TRIDENT:
+	case SPEAR:
+		return "1d8";
+	case BATTLEAXE:
+	case LONGSWORD:
+	case WARHAMMMER:
+		return "1d10";
+	default:
+		return wepDmgString(wep);
+	}
+}
+
 std::string wepDmgString(WEAPON_TYPE wep) {
 	switch (wep)
 	{

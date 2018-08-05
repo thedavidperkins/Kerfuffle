@@ -11,7 +11,7 @@ class Encounter {
 public:
 	Encounter(const std::string& defFile);
 	~Encounter();
-	bool fight(bool write = false);
+	bool fight(int write = -1);
 private:
 	bool _defineFromFile(const std::string& defFile);
 	bool _procFile(const std::string& fileName);

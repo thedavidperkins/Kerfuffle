@@ -86,7 +86,13 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 			}
 		}
 		else if (token == "ATTR") {
-			procLine >> m_str >> m_dex >> m_con >> m_int >> m_wis >> m_cha;
+			procLine 
+				>> m_abilityMods[STR] 
+				>> m_abilityMods[DEX] 
+				>> m_abilityMods[CON] 
+				>> m_abilityMods[INT] 
+				>> m_abilityMods[WIS] 
+				>> m_abilityMods[CHA];
 		}
 		else if (token == "ACDC") {
 			procLine >> m_AC >> m_spellDC;
@@ -127,7 +133,6 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 			bool shield = false;
 			while (line.find("ENDLOADOUT") != 0) {
 				std::getline(defStream, line);
-				if (line[0] == '#') continue;
 				if (!defStream) {
 					errStatus = "Error: met premature end of definition stream.";
 					return false;
@@ -148,9 +153,12 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 							errStatus = "Error: met premature end of definition stream.";
 							return false;
 						}
+						procLine.clear();
+						procLine.str(line);
+						procLine >> token;
 						WEAPON_TYPE wep = UNARMED;
-						if (!weaponFromString(line, wep)) {
-							errStatus = "Error: unknown weapon type " + line;
+						if (!weaponFromString(token, wep)) {
+							errStatus = "Error: unknown weapon type " + token;
 							return false;
 						}
 						vecToFill->push_back(wep);
@@ -164,9 +172,12 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 							errStatus = "Error: met premature end of definition stream.";
 							return false;
 						}
+						procLine.clear();
+						procLine.str(line);
+						procLine >> token;
 						WEAPON_PROPS_BITS bit = SIMPLE;
-						if (!propFromString(line, bit)) {
-							errStatus = "Error: unknown weapon property " + line;
+						if (!propFromString(token, bit)) {
+							errStatus = "Error: unknown weapon property " + token;
 							return false;
 						}
 						propProfs |= bit;
@@ -181,6 +192,20 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 				}
 			}
 			_populateLoadouts(weaponsOwned, weaponProfs, propProfs, dualWield, shield);
+		}
+		else if (token == "FEATURES") {
+			while (line.find("ENDFEATURES") != 0) {
+				std::getline(defStream, line);
+				if (!defStream) {
+					errStatus = "Error: met premature end of definition stream.";
+					return false;
+				}
+				procLine.clear();
+				procLine.str(line);
+				procLine >> token;
+				FEATURE_BIT bit;
+				if (ftrFrmStr(token, bit)) m_features |= bit;
+			}
 		}
 		else if (token == "ENDPLAYER") {
 			return true;
@@ -302,12 +327,12 @@ bool Player::loadNextAttack(Attack* atk) {
 }
 
 int Player::_getAbltyMod(WEAPON_TYPE weapon) {
-	int bonus = m_str;
+	int bonus = m_abilityMods[STR];
 	if (isRanged(weapon)) {
-		bonus = m_dex;
+		bonus = m_abilityMods[DEX];
 	}
-	if (isFinesse(weapon) && m_dex > m_str) {
-		bonus = m_dex;
+	if (isFinesse(weapon) && m_abilityMods[DEX] > m_abilityMods[STR]) {
+		bonus = m_abilityMods[DEX];
 	}
 	return bonus;
 }

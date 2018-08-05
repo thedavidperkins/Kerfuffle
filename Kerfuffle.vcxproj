@@ -28,6 +28,7 @@
     <ClCompile Include="src\DisengageAction.cpp" />
     <ClCompile Include="src\DodgeAction.cpp" />
     <ClCompile Include="src\Encounter.cpp" />
+    <ClCompile Include="src\Features.cpp" />
     <ClCompile Include="src\Foe.cpp" />
     <ClCompile Include="src\Loadout.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -48,6 +49,7 @@
     <ClInclude Include="include\DisengageAction.h" />
     <ClInclude Include="include\DodgeAction.h" />
     <ClInclude Include="include\Encounter.h" />
+    <ClInclude Include="include\Features.h" />
     <ClInclude Include="include\Foe.h" />
     <ClInclude Include="include\Loadout.h" />
     <ClInclude Include="include\Logger.h" />

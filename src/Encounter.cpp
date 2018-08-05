@@ -46,6 +46,7 @@ bool Encounter::_procFile(const std::string& fileName) {
 			while (line.find("ENDPLAYER") != 0) {
 				std::getline(file, line);
 				if (!file) return false;
+				if ((line[0] == '#') || (line.size() == 0)) continue;
 				out << line << std::endl;
 			}
 			Player* plyr = new Player(out);
@@ -57,6 +58,7 @@ bool Encounter::_procFile(const std::string& fileName) {
 			while (line.find("ENDFOE") != 0) {
 				std::getline(file, line);
 				if (!file) return false;
+				if (line[0] == '#') continue;
 				out << line << std::endl;
 			}
 			Foe* foe = new Foe(out);
@@ -103,23 +105,23 @@ bool Encounter::_foesAlive() {
 	for (auto& f : m_foes) {
 		if (f->isStanding()) return true;
 	}
-	std::cout << "All foes have died." << std::endl;
+	//std::cout << "All foes have died." << std::endl;
 	return false;
 }
 
 bool Encounter::_partyAlive() {
 	for (auto& p : m_party) {
 		if (p->isDead()) {
-			std::cout << p->getName() << " has died." << std::endl;
+			//std::cout << p->getName() << " has died." << std::endl;
 			return false;
 		}
 	}
 	return true;
 }
 
-bool Encounter::fight(bool write) {
+bool Encounter::fight(int write) {
 	_populateTeams();
-	if (write) LOG.openFile("EncLog.txt");
+	if (write >= 0) LOG.openFile("output\\EncLog" + std::to_string(write) + ".txt");
 	LOG("==============================================================");
 	LOG("                    FIGHT START                               ");
 	LOG("==============================================================");
@@ -138,7 +140,7 @@ bool Encounter::fight(bool write) {
 
 	std::sort(turnOrder.begin(), turnOrder.end(), [](Creature* a, Creature* b)->bool {
 		if (a->getInit() == b->getInit()) {
-			return a->getDex() > b->getDex();
+			return a->getAMod(DEX) > b->getAMod(DEX);
 		}
 		return (a->getInit() > b->getInit());
 	});
@@ -178,6 +180,6 @@ bool Encounter::fight(bool write) {
 	LOG(std::string("                    FIGHT END - ") + (ret ? "PLAYERS WIN" : "FOES WIN"));
 	LOG("==============================================================");
 
-	if (write) LOG.closeFile();
+	if (write >= 0) LOG.closeFile();
 	return ret;
 }

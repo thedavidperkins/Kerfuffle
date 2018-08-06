@@ -6,12 +6,12 @@
 
 #include "Weapons.h"
 
+class Creature;
 class Player;
 
 enum LOADOUT_PRIORITY {
-	MELEE_DAMAGE,
-	MELEE_DEFENSE,
-	RANGED_DAMAGE
+	P_DAMAGE,
+	P_DEFENSE
 };
 
 class Loadout {
@@ -40,9 +40,10 @@ public:
 	bool usingTwoHanded() const { return m_usingTwoHanded; }
 
 	// for priority sorting
-	int getScore(LOADOUT_PRIORITY priority) const;
+	int getScore(Creature* target, LOADOUT_PRIORITY priority, WEAPON_PROPS propsIncentives) const;
 private:
 	int _getAbltyScore(WEAPON_PROPS props);
+	int _countIncentivesSatisfied(WEAPON_PROPS props) const;
 	
 	WEAPON_TYPE m_wepType;
 	WEAPON_TYPE m_dualWepType;

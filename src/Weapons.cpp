@@ -357,6 +357,69 @@ int maxDamage(WEAPON_TYPE wep) {
 	}
 }
 
+void wepMinMaxDisRange(WEAPON_TYPE wep, int& min, int& max, int& dis) {
+	min = 5;
+	max = 5;
+	dis = 5;
+	switch (wep)
+	{
+	case DAGGER:
+	case HANDAXE:
+	case LIGHT_HAMMER:
+	case SPEAR:
+	case TRIDENT:
+		min = 0;
+		max = 20;
+		dis = 60;
+		break;
+	case DART:
+		max = 20;
+		dis = 60;
+		break;
+	case JAVELIN:
+	case SLING:
+	case HAND_CROSSBOW:
+		max = 30;
+		dis = 120;
+		break;
+	case LIGHT_CROSSBOW:
+	case SHORTBOW:
+		max = 80;
+		dis = 320;
+		break;
+	case GLAIVE:
+	case HALBERD:
+	case PIKE:
+	case WHIP:
+		min = 0;
+		max = 10;
+		dis = 10;
+		break;
+	case LANCE:
+		max = 10;
+		dis = 10;
+		break;
+	case BLOWGUN:
+		max = 25;
+		dis = 100;
+		break;
+	case HEAVY_CROSSBOW:
+		max = 100;
+		dis = 400;
+		break;
+	case LONGBOW:
+		max = 150;
+		dis = 600;
+		break;
+	case NET:
+		min = 0;
+		dis = 15;
+		break;
+	default:
+		break;
+	}
+}
+
 int minDamage(WEAPON_TYPE wep) {
 	if (wep == NET) {
 		return 0;

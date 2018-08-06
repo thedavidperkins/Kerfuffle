@@ -1,5 +1,7 @@
 #include "Loadout.h"
 #include "Player.h"
+#include "Creature.h"
+#include "Ring.h"
 
 int Loadout::counter = 0;
 
@@ -102,19 +104,45 @@ bool Loadout::isEquiv(const Loadout* other) const {
 	);
 }
 
-int Loadout::getScore(LOADOUT_PRIORITY priority) const {
+int Loadout::getScore(Creature* target, LOADOUT_PRIORITY priority, WEAPON_PROPS propsIncentives) const {
 	switch (priority)
 	{
-	case MELEE_DAMAGE:
-		return 3 * m_maxDamage + 2 * m_bonusMaxDamage + 5 * m_atkBonus - 20 * (m_wepProps & RANGED); // strongly weight attack bonus, avoid ranged
-	case MELEE_DEFENSE:
-		return getScore(MELEE_DAMAGE) + 20 * m_shield; // favor shield use
-	case RANGED_DAMAGE:
-		return 3 * m_maxDamage + 2 * m_bonusMaxDamage + 5 * m_atkBonus - 20 * (m_wepProps & MELEE); // strongly weight attack bonus, avoid melee
+	case P_DAMAGE: {
+		int ret = 3 * m_maxDamage;
+		ret += 2 * m_bonusMaxDamage;
+		ret += 5 * m_atkBonus;
+		if (!(propsIncentives & RANGED)) {
+			ret -= (m_wepProps & RANGED ? 20 : 0);
+		}
+		if (target != nullptr) { // check appropriate range of weapon to hit target
+			int min, max, dis;
+			wepMinMaxDisRange(m_wepType, min, max, dis);
+			int distance = dist(m_owner->getCell(), target->getCell());
+			int moveRange = m_owner->getRemainingRange();
+			if (distance < min) ret -= 15;
+			if (distance - moveRange > max) ret -= 15;
+			if (distance - moveRange > dis) ret -= 85;
+		}
+		ret += 20 * _countIncentivesSatisfied(propsIncentives);
+
+		return ret;
+	}
+	case P_DEFENSE:
+		return getScore(target, P_DAMAGE, propsIncentives) + 40 * m_shield; // favor shield use
 	default:
 		return 0;
 		break;
 	}
+}
+
+int Loadout::_countIncentivesSatisfied(WEAPON_PROPS incentives) const {
+	WEAPON_PROPS intersection = incentives & m_wepProps;
+	int ret = 0;
+	while (intersection > 0) {
+		ret += intersection & 1;
+		intersection >>= 1;
+	}
+	return ret;
 }
 
 WEAPON_PROPS Loadout::getProps(bool dual) const {

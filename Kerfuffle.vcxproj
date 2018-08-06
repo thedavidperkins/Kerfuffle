@@ -35,6 +35,7 @@
     <ClCompile Include="src\Action.cpp" />
     <ClCompile Include="src\OffhandAttack.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\Ring.cpp" />
     <ClCompile Include="src\SpellAction.cpp" />
     <ClCompile Include="src\Weapons.cpp" />
   </ItemGroup>
@@ -54,10 +55,12 @@
     <ClInclude Include="include\Loadout.h" />
     <ClInclude Include="include\Logger.h" />
     <ClInclude Include="include\OffhandAttack.h" />
+    <ClInclude Include="include\Ring.h" />
     <ClInclude Include="include\Spell.h" />
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\SpellAction.h" />
     <ClInclude Include="include\Weapons.h" />
+    <ClInclude Include="inline\FeatureDefs.inl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\defFiles.txt" />
@@ -121,7 +124,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include; $(ProjectDir)inline</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,7 +136,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include; $(ProjectDir)inline</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

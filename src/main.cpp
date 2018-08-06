@@ -5,6 +5,7 @@
 
 #include "Dice.h"
 #include "Encounter.h"
+#include "Ring.h"
 
 int main() {
 	try {

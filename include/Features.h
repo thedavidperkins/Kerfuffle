@@ -1,16 +1,17 @@
 #ifndef KERF_FEATURES_H
 #define KERF_FEATURES_H
 
+#include <vector>
 #include <string>
 
 class Creature;
 
 typedef __int64 FEATURE_BIT;
-const FEATURE_BIT F_LUCKY			= 0x1;
-const FEATURE_BIT F_BRAVE			= 0x2;
-const FEATURE_BIT F_SNEAK_ATTACK	= 0x4;
-//const FEATURE_BIT F_HALFLING_NIMBLENESS = 0x??? -- Awaiting move implementation
-//const FEATURE_BIT F_NATURALLY_STEALTHY = 0x??? -- Awaiting environment description sufficiently clear for this to make a difference
+
+#define FEATURE_DEF(className, bitName, bitVal) \
+const FEATURE_BIT F_##bitName = bitVal;
+
+#include "FeatureDefs.inl"
 
 typedef __int64 FEATURES;
 
@@ -41,6 +42,13 @@ public:
 	EmptyTrkr(FEATURE_BIT ftre, Creature* owner) : FeatureTrkr(ftre, owner) {}
 	virtual void reset() {}
 };
+#define EMPTY_TRKR(className, bitName)							\
+class className : public EmptyTrkr {							\
+public:															\
+    className(Creature* owner) : EmptyTrkr(bitName, owner) {}	\
+};
+EMPTY_TRKR(LuckyTrkr, F_LUCKY);
+EMPTY_TRKR(BraveTrkr, F_BRAVE);
 
 //=================================================================================
 
@@ -49,10 +57,10 @@ public:
 	SneakAttackTrkr(Creature* owner) : FeatureTrkr(F_SNEAK_ATTACK, owner) {}
 	virtual void reset() { m_used = false; }
 
-	bool isUsable(Creature* target);
+	bool isUsable(Creature* target, const std::vector<Creature*>& friends);
 	int use();
 protected:
-	bool _targetDistracted(Creature* target);
+	bool _targetDistracted(Creature* target, const std::vector<Creature*>& friends);
 	bool m_used;
 };
 
@@ -63,9 +71,9 @@ protected:
 template <class T>
 inline FEATURE_BIT classBit() { return 0; }
 
-#define BIT_FROM_CLASS(className, bitName) \
-template <> inline FEATURE_BIT classBit<className>() { return bitName; }
+#define FEATURE_DEF(className, bitName, bitVal) \
+template <> inline FEATURE_BIT classBit<className>() { return F_##bitName; }
 
-BIT_FROM_CLASS(SneakAttackTrkr, F_SNEAK_ATTACK)
+#include "FeatureDefs.inl"
 
 #endif//KERF_FEATURES_H

@@ -1,4 +1,5 @@
 #include "Foe.h"
+#include "Ring.h"
 
 Foe::Foe() : 
 	Creature(),
@@ -38,6 +39,9 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 		procLine >> token;
 		if (token == "FOE") {
 			procLine >> m_name;
+		}
+		else if (token == "SPEED") {
+			procLine >> m_speed;
 		}
 		else if (token == "ARCH") {
 			procLine >> token;
@@ -101,6 +105,8 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 			std::function<int(void)> dmgRoll = d0;
 			std::string dmgString;
 			DMG_TYPE type = BLUDGEONING;
+			WEAPON_PROPS props = 0;
+			int minRange = 0, maxRange = 5, disRange = 5;
 			while (line.find("ENDATK") != 0) {
 				std::getline(defStream, line);
 				if (!defStream) {
@@ -123,14 +129,33 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 						return false;
 					}
 				}
+				else if (token == "RANGE") {
+					procLine >> minRange >> maxRange >> disRange;
+				}
+				else if (token == "PROPS") {
+					while (line.find("ENDPROPS") != 0) {
+						std::getline(defStream, line);
+						if (!defStream) {
+							errStatus = "Error: stream ended in attack properties.";
+							return false;
+						}
+						procLine.clear();
+						procLine.str(line);
+						procLine >> token;
+						WEAPON_PROPS_BITS bit;
+						if (propFromString(token, bit)) props |= bit;
+					}
+				}
 				else if (token == "ENDATK") {
 					Attack* atk = new Attack(this);
-					atk->load(type, atkBonus, dmgString);
+					atk->load(type, atkBonus, dmgString, -1, props, minRange, maxRange, disRange);
 					m_attacks.push_back(atk);
 				}
 			}
 		}
 		else if (token == "ENDFOE") {
+			m_x = RING_SIZE - 1;
+			m_y = RING_SIZE - 1;
 			return true;
 		}
 	}
@@ -164,5 +189,28 @@ void Foe::takeDamage(Attack* attack) {
 	if (m_HP <= 0) {
 		m_alive = false;
 		m_dead = true;
+		m_name[0] = 'x';
+		m_name[1] = 'x';
 	}
+}
+
+bool Foe::hasAttackProp(WEAPON_PROPS_BITS prop) {
+	// only check first attack, because that will be the first used 
+	// (until we implement intelligent reordering of attacks, if ever)
+	return m_attacks[0]->getProps() & prop;
+}
+
+int Foe::getMaxAtkRange() {
+	int max = 0;
+	int mx, mn, dis;
+	for (auto& a : m_attacks) {
+		a->getMinMaxDisRange(mn, mx, dis);
+		if (mx > max) max = mx;
+		if (dis > max) max = dis;
+	}
+	return max;
+}
+
+bool Foe::prepNextAttack(Attack* atk, Creature* target) {
+	return Creature::prepNextAttack(atk, target);
 }

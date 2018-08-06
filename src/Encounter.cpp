@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "Foe.h"
 #include "Logger.h"
+#include "Ring.h"
 
 Encounter::Encounter(const std::string& defFile) :
 	m_party(),
@@ -83,6 +84,13 @@ void Encounter::_populateTeams() {
 	for (auto& foe : m_foesInitial) {
 		m_foes.push_back(foe->makeCopy());
 	}
+
+	for (auto& plyr : m_party) {
+		plyr->setFriends(&m_party);
+	}
+	for (auto& foe : m_foes) {
+		foe->setFriends(&m_foes);
+	}
 }
 
 void Encounter::_depopulateTeams() {
@@ -120,6 +128,8 @@ bool Encounter::_partyAlive() {
 }
 
 bool Encounter::fight(int write) {
+	Ring& r = Ring::getInstance();
+	r.reset();
 	_populateTeams();
 	if (write >= 0) LOG.openFile("output\\EncLog" + std::to_string(write) + ".txt");
 	LOG("==============================================================");
@@ -151,11 +161,13 @@ bool Encounter::fight(int write) {
 	int counter = 0;
 	bool ret = false;
 	while (counter++ < timeOut) {
+
 		LOG("- - - - - - - - - - - - - - - - - - - - - - - - - - -");
 		for (auto& cur : turnOrder) {
 			if (cur->isStanding()) {
 				LOG("++++++++++++++++++++++++++");
 				cur->takeTurn(m_party, m_foes);
+				LOG(r.draw());
 			}
 			else if (!cur->isDead() && !cur->isStable()) {
 				LOG("++++++++++++++++++++++++++");

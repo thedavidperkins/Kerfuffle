@@ -16,10 +16,13 @@ public:
 	virtual void takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) override;
 	virtual void takeDamage(Attack* attack) override;
 	virtual bool deathCheck() override;
-	virtual bool loadNextAttack(Attack* atk) override;
+	virtual bool prepNextAttack(Attack* atk, Creature* target) override;
 	virtual void getAttackList(std::vector<Attack*>& atks) override;
 	virtual void cleanupAttackList(std::vector<Attack*>& atks) override;
-	
+	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop);
+	virtual void incentivizeProp(WEAPON_PROPS_BITS prop);
+	virtual int getMaxAtkRange();
+
 	void loadOffhandAttack(Attack& atk);
 	void usedBonusAction() { m_bonus--; }
 
@@ -44,7 +47,7 @@ private:
 		bool dual,
 		bool shield
 	);
-	void _sortLoadouts();
+	void _sortLoadouts(Creature* target = nullptr);
 	void _cleanupBonusActions();
 
 	int m_level;
@@ -58,6 +61,7 @@ private:
 	std::vector<Loadout*> m_loadouts;
 	int m_chosenLoadout;
 	bool m_swappedLoadout;
+	WEAPON_PROPS m_propIncentives;
 
 	bool m_noMoreAttacks; //used for canceling attacks after using a loaded weapon
 	bool m_firstAttack;

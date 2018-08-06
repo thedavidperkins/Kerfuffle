@@ -15,7 +15,10 @@ Attack::Attack(Creature* agent) :
 	m_loaded(false),
 	m_advantage(false),
 	m_disadvantage(false),
-	m_crit(false)
+	m_crit(false), 
+	m_maxRange(5),
+	m_minRange(0),
+	m_disRange(5)
 {}
 
 void Attack::load(Loadout* loadout, bool dual) {
@@ -28,10 +31,18 @@ void Attack::load(Loadout* loadout, bool dual) {
 	m_type = loadout->getDmgType(dual);
 	m_loaded = true;
 	m_crit = false;
+	wepMinMaxDisRange(loadout->getWepType(), m_minRange, m_maxRange, m_disRange);
 }
 
-void Attack::load(DMG_TYPE type, int atkBonus, const std::string& dmgString, int dmgBonus) {
-	m_props = 0;
+void Attack::load(DMG_TYPE type, int atkBonus, const std::string& dmgString,
+	int dmgBonus,
+	WEAPON_PROPS props,
+	int minRange,
+	int maxRange,
+	int disRange
+) 
+{
+	m_props = props;
 	m_atkBonus = atkBonus;
 	m_dmgDice = funcFromStr(dmgString, m_dmgBonus);
 	if (dmgBonus >= 0) {
@@ -41,6 +52,9 @@ void Attack::load(DMG_TYPE type, int atkBonus, const std::string& dmgString, int
 	m_type = type;
 	m_loaded = true;
 	m_crit = false;
+	m_minRange = minRange;
+	m_maxRange = maxRange;
+	m_disRange = disRange;
 }
 
 void Attack::load(const Attack& rhs) {
@@ -52,6 +66,9 @@ void Attack::load(const Attack& rhs) {
 	m_type = rhs.m_type;
 	m_loaded = true;
 	m_crit = false;
+	m_minRange = rhs.m_minRange;
+	m_maxRange = rhs.m_maxRange;
+	m_disRange = rhs.m_disRange;
 }
 
 void Attack::unload() {
@@ -62,6 +79,9 @@ void Attack::unload() {
 	m_props = 0;
 	m_loaded = false;
 	m_crit = false;
+	m_minRange = 0;
+	m_maxRange = 0;
+	m_disRange = 0;
 }
 
 int Attack::atk() {
@@ -103,7 +123,7 @@ int Attack::dmg(Creature* target) {
 	// Check for sneak attack
 	if (m_agent->getFeatures() & F_SNEAK_ATTACK) {
 		auto sat = m_agent->getTrkr<SneakAttackTrkr>();
-		if (sat->isUsable(target)) {
+		if (sat->isUsable(target, *m_agent->getFriends())) {
 			ret += sat->use();
 		}
 	}
@@ -117,4 +137,10 @@ DMG_TYPE Attack::dmgType() {
 
 std::string Attack::getUser() const { 
 	return m_agent->getName();
+}
+
+void Attack::getMinMaxDisRange(int& min, int& max, int& dis) {
+	min = m_minRange;
+	max = m_maxRange;
+	dis = m_disRange;
 }

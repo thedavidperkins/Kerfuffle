@@ -5,12 +5,12 @@
 #include "Logger.h"
 #include "Player.h"
 
+#define FEATURE_DEF(className, bitName, bitVal) \
+{ #bitName, F_##bitName },
+
 static std::map<std::string, FEATURE_BIT> lFeatureNames{
-	{ "LUCKY", F_LUCKY },
-	{ "BRAVE", F_BRAVE },
-	{ "SNEAK_ATTACK", F_SNEAK_ATTACK }
-//	{ "HALFLING_NIMBLENESS", F_HALFLING_NIMBLENESS }
-//  { "NATURALLY_STEALTHY", F_NATURALLY_STEALTHY }
+#include "FeatureDefs.inl"
+	{ "Invalid", 0 }
 };
 
 bool ftrFrmStr(const std::string& str, FEATURE_BIT& bit) {
@@ -34,12 +34,17 @@ FeatureTrkr* FeatureTrkr::makeTracker(FEATURE_BIT type, Creature* owner) {
 
 //===========================================================================
 
-bool SneakAttackTrkr::_targetDistracted(Creature* target) {
-	return true;
+bool SneakAttackTrkr::_targetDistracted(Creature* target, const std::vector<Creature*>& friends) {
+	for (auto& c : target->getAdjCreatures(friends)) {
+		if (c != m_owner && c->isStanding()) {
+			return true;
+		}
+	}
+	return false;
 }
 
-bool SneakAttackTrkr::isUsable(Creature* target) {
-	return (!m_used) && (m_owner->hadAdvantage() || _targetDistracted(target));
+bool SneakAttackTrkr::isUsable(Creature* target, const std::vector<Creature*>& friends) {
+	return (!m_used) && (m_owner->hadAdvantage() || (!m_owner->hadDisadvantage() && _targetDistracted(target, friends)));
 }
 
 int SneakAttackTrkr::use() {

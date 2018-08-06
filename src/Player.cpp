@@ -7,16 +7,18 @@
 #include "Logger.h"
 #include "Loadout.h"
 #include "OffhandAttack.h"
+#include "Ring.h"
 
 Player::Player() :
 	Creature(),
 	m_level(1),
 	m_bonus(1),
 	m_bonusActions(),
-	m_loadPriority(MELEE_DAMAGE),
+	m_loadPriority(P_DAMAGE),
 	m_loadouts(),
 	m_chosenLoadout(-1),
 	m_swappedLoadout(false),
+	m_propIncentives(0),
 	m_noMoreAttacks(false),
 	m_firstAttack(true),
 	m_nAttacks(1),
@@ -32,6 +34,7 @@ Player::Player(const Player* rhs) :
 	m_loadouts(),
 	m_chosenLoadout(rhs->m_chosenLoadout),
 	m_swappedLoadout(false),
+	m_propIncentives(0),
 	m_noMoreAttacks(false),
 	m_firstAttack(true),
 	m_nAttacks(rhs->m_nAttacks),
@@ -62,6 +65,9 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 		if (token[0] == '#') continue;
 		if (token == "PLAYER") {
 			procLine >> m_name >> m_level;
+		}
+		else if (token == "SPEED") {
+			procLine >> m_speed;
 		}
 		else if (token == "ARCH") {
 			procLine >> token;
@@ -208,6 +214,8 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 			}
 		}
 		else if (token == "ENDPLAYER") {
+			m_x = 0;
+			m_y = 0;
 			return true;
 		}
 	}
@@ -228,6 +236,7 @@ Player* Player::makeCopy() {
 void Player::takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) {
 	m_noMoreAttacks = m_swappedLoadout = false;
 	m_firstAttack = true;
+	m_propIncentives = 0;
 	m_bonus = m_spellCast = 1;
 	for (auto& b : m_bonusActions) {
 		if ((b->timeToUse() & START_OF_TURN) && b->isUsable(party, foes)) {
@@ -304,25 +313,24 @@ void Player::_checkLoadoutSwap() {
 	}
 }
 
-bool Player::loadNextAttack(Attack* atk) {
+bool Player::prepNextAttack(Attack* atk, Creature* target) {
 	if (m_noMoreAttacks) return false;
 	if (!m_swappedLoadout) {
 		_checkLoadoutSwap();
 		if (m_swappedLoadout) {
-			// don't switch to a loading weapon after first attack
 			if (!m_firstAttack && (m_loadouts[0]->getProps() & LOADING)) {
-				auto l = std::find_if(m_loadouts.begin(), m_loadouts.end(), [](const Loadout* check) {
-					return !(check->getProps() & LOADING);
-				});
-				if (l == m_loadouts.end()) return false;
-				else {
-					std::iter_swap(l, m_loadouts.begin());
-				}
+				return false;
 			}
 		}
 	}
 	atk->load(m_loadouts[0]);
-	if (m_loadouts[0]->getProps() & LOADING) m_noMoreAttacks = true;
+	if (!Creature::prepNextAttack(atk, target)) {
+		return false;
+	}
+	if (m_loadouts[0]->getProps() & LOADING) {
+		m_noMoreAttacks = true;
+	}
+
 	return true;
 }
 
@@ -395,25 +403,20 @@ void Player::_populateLoadouts(
 	switch (m_archetype)
 	{
 	case BRAWLER:
-		m_loadPriority = MELEE_DEFENSE;
+		m_loadPriority = P_DEFENSE;
 		break;
-	case ROGUE:
-		m_loadPriority = MELEE_DAMAGE;
-		break;
-	case RANGER:
-	case DAMAGE_CASTER:
-	case SUPPORT_CASTER:
-		m_loadPriority = RANGED_DAMAGE;
 	default:
+		m_loadPriority = P_DAMAGE;
 		break;
 	}
 	_sortLoadouts();
 	m_chosenLoadout = m_loadouts[0]->getID();
 }
 
-void Player::_sortLoadouts() {
+void Player::_sortLoadouts(Creature* target) {
+	WEAPON_PROPS props = m_propIncentives;
 	std::sort(m_loadouts.begin(), m_loadouts.end(), [=](const Loadout* a, const Loadout* b) {
-		return a->getScore(m_loadPriority) > b->getScore(m_loadPriority);
+		return a->getScore(target, m_loadPriority, props) > b->getScore(target, m_loadPriority, props);
 	});
 }
 
@@ -427,4 +430,28 @@ void Player::_cleanupBonusActions() {
 	m_bonusActions.erase(std::remove_if(m_bonusActions.begin(), m_bonusActions.end(), [](const BonusAction* b) {
 		return b == nullptr;
 	}), m_bonusActions.end());
+}
+
+bool Player::hasAttackProp(WEAPON_PROPS_BITS prop) {
+	for (auto& l : m_loadouts) {
+		if (l->getProps() & prop) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Player::incentivizeProp(WEAPON_PROPS_BITS prop) {
+	m_propIncentives |= prop;
+}
+
+int Player::getMaxAtkRange() {
+	int max = 0;
+	int mx, mn, dis;
+	for (auto& l : m_loadouts) {
+		wepMinMaxDisRange(l->getWepType(), mn, mx, dis);
+		if (mx > max) max = mx;
+		if (dis > max) max = dis;
+	}
+	return max;
 }

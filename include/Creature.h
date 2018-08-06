@@ -11,6 +11,7 @@
 #include "Spell.h"
 #include "Features.h"
 
+class Cell;
 class Attack;
 
 enum ABILITY_SCORES {
@@ -32,7 +33,7 @@ enum ARCHETYPE {
 };
 
 enum CONDITION_BITS {
-	C_FRIGHTENED
+	C_FRIGHTENED = 0x1
 };
 typedef unsigned int CONDITION;
 
@@ -40,12 +41,19 @@ class Creature {
 public:
 	virtual ~Creature();
 
-	void initRoll();
 	virtual void takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) = 0;
-	bool checkHit(Attack* attack);
 	virtual void takeDamage(Attack* attack);
 	virtual bool deathCheck() = 0;
-	virtual bool loadNextAttack(Attack* atk);
+	virtual bool prepNextAttack(Attack* atk, Creature* target) = 0;
+	virtual void getAttackList(std::vector<Attack*>& atks) = 0;
+	virtual void cleanupAttackList(std::vector<Attack*>& atks) = 0;
+	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop) = 0;
+	virtual void incentivizeProp(WEAPON_PROPS_BITS prop) {}
+	virtual int getMaxAtkRange() = 0;
+
+	bool checkHit(Attack* attack);
+	
+	void initRoll();
 
 	void usedSpell() { m_spellCast--; }
 	void usedAction() { m_actions--; }
@@ -56,12 +64,12 @@ public:
 	int getInit() const { return m_init; }
 	int getAMod(ABILITY_SCORES sc) const { return m_abilityMods[sc]; }
 	bool hadAdvantage() const { return m_hadAdvantage; }
+	bool hadDisadvantage() const { return m_hadDisadvantage; }
+	int getSpeed() const { return m_speed; }
 
 	std::string getName() const { return m_name; }
 
 	Creature* chooseAttackTarget(const std::vector<Creature*>& enemies);
-	virtual void getAttackList(std::vector<Attack*>& atks) = 0;
-	virtual void cleanupAttackList(std::vector<Attack*>& atks) = 0;
 
 	Spell* chooseSpell(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 
@@ -84,6 +92,24 @@ public:
 		}
 		return ret;
 	}
+
+	std::vector<Creature*> getAdjCreatures();
+	std::vector<Creature*> getAdjCreatures(const std::vector<Creature*>& candidates); // restrict list to intersection with candidates
+	std::vector<Creature*> getCreaturesInRange(int range);
+	std::vector<Creature*> getCreaturesInRange(const std::vector<Creature*>& candidates, int range); // restrict list to intersection with candidates
+
+	int getRemainingRange();
+	Cell* getCell() { return m_cell; }
+	bool moveToRangeOf(Creature* target, int range);
+	bool moveToAdjacent(Creature* target);
+	bool moveToCell(Cell* dest);
+
+	void dash();
+	Creature* findNearest(const std::vector<Creature*> crtrs, int& distance);
+
+	void setFriends(std::vector<Creature*>* friends) { m_friends = friends; }
+	std::vector<Creature*>* getFriends() { return m_friends; }
+
 protected:
 	Creature();
 	Creature(const Creature* rhs);
@@ -93,6 +119,10 @@ protected:
 	void _resetFtreTrkrs();
 	void _setSpellPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 	void _setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	void _idCell();
+	bool _checkRangedAttack(Attack* atk, Creature* target);
+
+	void _finishMove(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies);
 
 	std::string m_name;
 
@@ -150,6 +180,15 @@ protected:
 
 	// Miscellaneous state tracking
 	bool m_hadAdvantage;
+	bool m_hadDisadvantage;
+	std::vector<Creature*>* m_friends;
+
+	// Position
+	int m_x;
+	int m_y;
+	Cell* m_cell;
+	int m_speed;
+	int m_movementRemaining;
 };
 
 #endif//KERF_CREATURE_H

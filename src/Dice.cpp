@@ -79,8 +79,11 @@ std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus) {
 	procToken >> quant;
 	procToken.get();
 	procToken >> die;
-	procToken.get();
-	if (procToken) procToken >> dmgBonus;
+	char c = procToken.get();
+	if (procToken) {
+		procToken >> dmgBonus;
+		if (c == '-') dmgBonus *= -1;
+	}
 	switch (die) {
 	case 4:
 		dieFunc = d4;

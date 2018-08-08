@@ -24,7 +24,7 @@ int d12();
 int d20();
 int d100();
 
-std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus);
+std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus, std::function<int(void)>& singleDie);
 
 #endif//KERF_DICE_H
 

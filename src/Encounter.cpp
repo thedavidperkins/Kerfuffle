@@ -87,9 +87,11 @@ void Encounter::_populateTeams() {
 
 	for (auto& plyr : m_party) {
 		plyr->setFriends(&m_party);
+		plyr->init();
 	}
 	for (auto& foe : m_foes) {
 		foe->setFriends(&m_foes);
+		foe->init();
 	}
 }
 

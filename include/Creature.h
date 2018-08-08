@@ -32,6 +32,28 @@ enum ARCHETYPE {
 	SUPPORT_CASTER
 };
 
+enum CHECK_TYPE {
+	ACRO_CHK = 0,
+	ANIM_CHK,
+	ARCA_CHK,
+	ATHL_CHK,
+	DECE_CHK,
+	HIST_CHK,
+	INSI_CHK,
+	INTI_CHK,
+	INVE_CHK,
+	MEDI_CHK,
+	NATU_CHK,
+	PERC_CHK,
+	PERF_CHK,
+	PERS_CHK,
+	RELI_CHK,
+	SLEI_CHK,
+	STEA_CHK,
+	SURV_CHK,
+	N_CHECK_TYPE
+};
+
 enum CONDITION_BITS {
 	C_FRIGHTENED = 0x1
 };
@@ -40,16 +62,16 @@ typedef unsigned int CONDITION;
 class Creature {
 public:
 	virtual ~Creature();
-
+	void init();
 	virtual void takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) = 0;
 	virtual void takeDamage(Attack* attack);
 	virtual bool deathCheck() = 0;
 	virtual bool prepNextAttack(Attack* atk, Creature* target) = 0;
 	virtual void getAttackList(std::vector<Attack*>& atks) = 0;
 	virtual void cleanupAttackList(std::vector<Attack*>& atks) = 0;
-	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop) = 0;
+	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop, bool dual = false) = 0;
 	virtual void incentivizeProp(WEAPON_PROPS_BITS prop) {}
-	virtual int getMaxAtkRange() = 0;
+	virtual int getMaxAtkRange(bool dual = false) = 0;
 
 	bool checkHit(Attack* attack);
 	
@@ -66,6 +88,11 @@ public:
 	bool hadAdvantage() const { return m_hadAdvantage; }
 	bool hadDisadvantage() const { return m_hadDisadvantage; }
 	int getSpeed() const { return m_speed; }
+	int getHP() const { return m_HP; }
+	int getHPTP() const { return m_HP + m_tempHP; }
+	int getMaxHP() const { return m_maxHP; }
+	int getHealthLost() const { return m_maxHP - m_HP; }
+	void healBy(int healing);
 
 	std::string getName() const { return m_name; }
 
@@ -81,8 +108,12 @@ public:
 	int rolld20Adv(ROLL_TYPE rollType); // Allow player features to intervene on rolls
 	int rolld20Dis(ROLL_TYPE rollType); // Allow player features to intervene on rolls
 	int savingThrow(ABILITY_SCORES sc, CONDITION threat = 0);
+	int abilityCheck(const std::vector<CHECK_TYPE>& abilities);
+	int abilityCheck(ABILITY_SCORES sc);
 
 	FEATURES getFeatures() const { return m_features; }
+
+	FeatureTrkr* getTrkr(FEATURE_BIT ftre);
 
 	template <class T>
 	T* getTrkr() {
@@ -128,6 +159,8 @@ protected:
 
 	// ability modifiers
 	int m_abilityMods[N_ABILITY_SCORES];
+	int m_savingThrowProfs[N_ABILITY_SCORES];
+	int m_chkProfs[N_CHECK_TYPE];
 
 	// difficulty classes
 	int m_AC;
@@ -190,6 +223,13 @@ protected:
 	int m_speed;
 	int m_movementRemaining;
 };
+
+bool checkProfsFromString(const std::string& token, CHECK_TYPE& val);
+bool saveProfsFromString(const std::string& token, ABILITY_SCORES& val);
+ABILITY_SCORES checkAbility(CHECK_TYPE chk);
+
+std::vector<Creature*> sortCreaturesBy(const std::vector<Creature*> list, std::function<bool(Creature*, Creature*)> pred);
+std::vector<Creature*> sortCreaturesByLeastHealth(const std::vector<Creature*> list);
 
 #endif//KERF_CREATURE_H
 

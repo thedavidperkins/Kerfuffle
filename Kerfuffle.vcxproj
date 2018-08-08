@@ -28,6 +28,7 @@
     <ClCompile Include="src\DisengageAction.cpp" />
     <ClCompile Include="src\DodgeAction.cpp" />
     <ClCompile Include="src\Encounter.cpp" />
+    <ClCompile Include="src\FeatureAction.cpp" />
     <ClCompile Include="src\Features.cpp" />
     <ClCompile Include="src\Foe.cpp" />
     <ClCompile Include="src\Loadout.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="include\DisengageAction.h" />
     <ClInclude Include="include\DodgeAction.h" />
     <ClInclude Include="include\Encounter.h" />
+    <ClInclude Include="include\FeatureAction.h" />
     <ClInclude Include="include\Features.h" />
     <ClInclude Include="include\Foe.h" />
     <ClInclude Include="include\Loadout.h" />
@@ -64,6 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\defFiles.txt" />
+    <Text Include="resources\milo.txt" />
+    <Text Include="resources\parg.txt" />
     <Text Include="resources\sample.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

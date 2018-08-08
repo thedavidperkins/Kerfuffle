@@ -76,7 +76,7 @@ WEAPON_PROPS gWeaponProps[] = {
 	MELEE | MARTIAL | HEAVY | TWO_HANDED,							//GREATAXE
 	MELEE | MARTIAL | HEAVY | TWO_HANDED,							//GREATSWORD
 	MELEE | MARTIAL | HEAVY | REACH | TWO_HANDED,					//HALBERD
-	MELEE | MARTIAL | REACH | SPECIAL,								//LANCE
+	MELEE | MARTIAL | REACH | SPECIAL | TWO_HANDED,					//LANCE
 	MELEE | MARTIAL | VERSATILE,									//LONGSWORD
 	MELEE | MARTIAL | HEAVY | TWO_HANDED,							//MAUL
 	MELEE | MARTIAL,												//MORNINGSTAR
@@ -545,4 +545,17 @@ bool dmgTypeFromString(const std::string& typeName, DMG_TYPE& type) {
 
 std::string dmgTypeToString(DMG_TYPE type) {
 	return gDamageTypeNames[type];
+}
+
+std::function<int(void)> wepSingleDie(WEAPON_TYPE wep) {
+	switch (wep)
+	{
+	case BLOWGUN:
+		return d0;
+	case GREATSWORD:
+	case MAUL:
+		return d6;
+	default:
+		return gWeaponDmg[wep];
+	}
 }

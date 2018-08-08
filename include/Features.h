@@ -49,6 +49,17 @@ public:															\
 };
 EMPTY_TRKR(LuckyTrkr, F_LUCKY);
 EMPTY_TRKR(BraveTrkr, F_BRAVE);
+EMPTY_TRKR(SavageAttacksTrkr, F_SAVAGE_ATTACKS);
+
+//=================================================================================
+
+class ActionFeatureTrkr : public FeatureTrkr {
+public:
+	ActionFeatureTrkr(FEATURE_BIT ftre, Creature* owner) : FeatureTrkr(ftre, owner) {}
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) = 0;
+	virtual void invoke() = 0;
+	virtual void reset() = 0;
+};
 
 //=================================================================================
 
@@ -62,6 +73,31 @@ public:
 protected:
 	bool _targetDistracted(Creature* target, const std::vector<Creature*>& friends);
 	bool m_used;
+};
+
+//=================================================================================
+
+class RelentlessEnduranceTrkr : public FeatureTrkr {
+public:
+	RelentlessEnduranceTrkr(Creature* owner) : FeatureTrkr(F_RELENTLESS_ENDURANCE, owner), m_used(false) {}
+	virtual void reset() {}
+	bool isUsable() { return !m_used; }
+	void use() { m_used = true; }
+protected:
+	bool m_used;
+};
+
+//=================================================================================
+
+class LayOnHandsTrkr : public ActionFeatureTrkr {
+public:
+	LayOnHandsTrkr(Creature* owner);
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	virtual void invoke();
+	virtual void reset() {}
+private:
+	int m_pool;
+	Creature* m_target;
 };
 
 //=================================================================================

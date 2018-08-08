@@ -19,11 +19,11 @@ public:
 	virtual bool prepNextAttack(Attack* atk, Creature* target) override;
 	virtual void getAttackList(std::vector<Attack*>& atks) override;
 	virtual void cleanupAttackList(std::vector<Attack*>& atks) override;
-	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop);
+	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop, bool dual = false);
 	virtual void incentivizeProp(WEAPON_PROPS_BITS prop);
-	virtual int getMaxAtkRange();
+	virtual int getMaxAtkRange(bool dual = false);
 
-	void loadOffhandAttack(Attack& atk);
+	bool loadOffhandAttack(Attack& atk, Creature* target);
 	void usedBonusAction() { m_bonus--; }
 
 	int nAttacks() const { return m_nAttacks; }

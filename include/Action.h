@@ -8,11 +8,12 @@ class Creature;
 // Do not add to this enum list without adding a corresponding class for
 //	the factory function tryAction (see implementation in Action.cpp)
 enum ACTION_TYPE {
-	ATTACK = 0,
-	SPELL,
-	DASH,
-	DISENGAGE,
-	DODGE,
+	ATTACK_ACTION = 0,
+	SPELL_ACTION,
+	FEATURE_ACTION,
+	DASH_ACTION,
+	DISENGAGE_ACTION,
+	DODGE_ACTION,
 	N_ACTION_TYPE
 };
 

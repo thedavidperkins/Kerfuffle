@@ -5,21 +5,23 @@
 
 int Loadout::counter = 0;
 
-Loadout::Loadout(WEAPON_TYPE wep, Player* owner, bool prof, bool shield, WEAPON_TYPE dual, bool dualProf) :
+Loadout::Loadout(WEAPON_TYPE wep, Player* owner, bool prof, bool shield, WEAPON_TYPE dual, bool dualProf, bool usingTwoHanded) :
 	m_wepType(wep),
 	m_dualWepType(dual),
 	m_atkBonus(0),
 	m_dualAtkBonus(0),
 	m_dmgBonus(0),
 	m_dmgDice(gWeaponDmg[wep]),
+	m_singleDie(wepSingleDie(wep)),
 	m_dualDmgDice(gWeaponDmg[dual]),
+	m_dualSingleDie(wepSingleDie(dual)),
 	m_dmgType(gDamageTypes[wep]),
 	m_dualDmgType(gDamageTypes[dual]),
 	m_wepProps(gWeaponProps[wep]),
 	m_dualWepProps(gWeaponProps[dual]),
 	m_shield(shield),
 	m_dual(dual != UNARMED),
-	m_usingTwoHanded(false),
+	m_usingTwoHanded(usingTwoHanded),
 	m_owner(owner),
 	m_maxDamage((isLoading(wep) ? 1 : owner->nAttacks()) * maxDamage(wep)),
 	m_acBonus(shield ? 2 : 0),
@@ -35,9 +37,13 @@ Loadout::Loadout(WEAPON_TYPE wep, Player* owner, bool prof, bool shield, WEAPON_
 	}
 
 	// check for versatile weapon
-	if (!shield && !m_dual && isVersatile(wep)) {
+	if (m_usingTwoHanded && (m_wepProps & VERSATILE)) {
+		if (shield || m_dual) {
+			throw std::runtime_error("Can't use a two-handed weapon with shield or off-hand");
+		}
+		if (m_wepProps & THROWN) m_wepProps -= THROWN;
 		m_dmgDice = gVersWeaponDmg[wep];
-		m_usingTwoHanded = true;
+		m_maxDamage += 2;
 	}
 }
 
@@ -48,7 +54,9 @@ Loadout::Loadout(const Loadout* rhs) :
 	m_dualAtkBonus(rhs->m_dualAtkBonus),
 	m_dmgBonus(rhs->m_dmgBonus),
 	m_dmgDice(rhs->m_dmgDice),
+	m_singleDie(rhs->m_singleDie),
 	m_dualDmgDice(rhs->m_dualDmgDice),
+	m_dualSingleDie(rhs->m_dualSingleDie),
 	m_dmgType(rhs->m_dmgType),
 	m_dualDmgType(rhs->m_dualDmgType),
 	m_wepProps(rhs->m_wepProps),
@@ -100,7 +108,8 @@ bool Loadout::isEquiv(const Loadout* other) const {
 		m_dualWepProps == other->m_dualWepProps &&
 		m_shield == other->m_shield &&
 		m_dual == other->m_dual &&
-		m_usingTwoHanded == other->m_usingTwoHanded
+		m_usingTwoHanded == other->m_usingTwoHanded &&
+		m_maxDamage == other->m_maxDamage
 	);
 }
 
@@ -163,6 +172,11 @@ int Loadout::getDmgBonus(bool dual) const {
 std::function<int(void)> Loadout::getDmgDice(bool dual) const {
 	if (dual) return m_dualDmgDice;
 	else return m_dmgDice;
+}
+
+std::function<int(void)> Loadout::getSingleDie(bool dual) const {
+	if (dual) return m_dualSingleDie;
+	else return m_singleDie;
 }
 
 DMG_TYPE Loadout::getDmgType(bool dual) const {

@@ -1,13 +1,17 @@
-#ifndef KERF_ATTACK_ACTION_H
-#define KERF_ATTACK_ACTION_H
+#ifndef KERF_FEATURE_ACTION_H
+#define KERF_FEATURE_ACTION_H
 
 #include "Action.h"
+#include "Features.h"
 
-class AttackAction : public Action {
+class FeatureAction : public Action {
 public:
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 	virtual void invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
-	AttackAction(Creature* user);
+	FeatureAction(Creature* user);
+private:
+	ActionFeatureTrkr* m_toUse;
 };
 
-#endif//KERF_ATTACK_ACTION_H
+#endif//KERF_FEATURE_ACTION_H
+

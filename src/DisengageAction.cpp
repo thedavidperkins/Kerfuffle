@@ -2,7 +2,7 @@
 #include "Logger.h"
 #include "Creature.h"
 
-DisengageAction::DisengageAction(Creature* user) : Action(DASH, user) {}
+DisengageAction::DisengageAction(Creature* user) : Action(DASH_ACTION, user) {}
 
 bool DisengageAction::isUsable(const std::vector<Creature*>&, const std::vector<Creature*>&) {
 	delete this;

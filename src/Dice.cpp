@@ -70,12 +70,11 @@ int d100() {
 	return randInt(100);
 }
 
-std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus) {
+std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus, std::function<int(void)>& singleDie) {
 	std::stringstream procToken(token);
 	int quant;
 	int die;
 	dmgBonus = 0;
-	std::function<int(void)> dieFunc;
 	procToken >> quant;
 	procToken.get();
 	procToken >> die;
@@ -86,25 +85,25 @@ std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus) {
 	}
 	switch (die) {
 	case 4:
-		dieFunc = d4;
+		singleDie = d4;
 		break;
 	case 6:
-		dieFunc = d6;
+		singleDie = d6;
 		break;
 	case 8:
-		dieFunc = d8;
+		singleDie = d8;
 		break;
 	case 10:
-		dieFunc = d10;
+		singleDie = d10;
 		break;
 	case 12:
-		dieFunc = d12;
+		singleDie = d12;
 		break;
 	case 20:
-		dieFunc = d20;
+		singleDie = d20;
 		break;
 	case 100:
-		dieFunc = d100;
+		singleDie = d100;
 		break;
 	default:
 		throw std::runtime_error("Error: invalid die requested.");
@@ -112,7 +111,7 @@ std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus) {
 	return [=]() {
 		int res = 0;
 		for (int iter = 0; iter < quant; ++iter) {
-			res += dieFunc();
+			res += singleDie();
 		}
 		return res;
 	};

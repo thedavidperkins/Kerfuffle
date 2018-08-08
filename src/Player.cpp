@@ -110,6 +110,44 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 		else if (token == "PROFBONUS") {
 			procLine >> m_profBonus;
 		}
+		else if (token == "SAVEPROFS") {
+			while (line.find("ENDSAVEPROFS") != 0) {
+				std::getline(defStream, line);
+				if (!defStream) {
+					errStatus = "Error: stream ended in save bonuses.";
+					return false;
+				}
+				procLine.clear();
+				procLine.str(line);
+				procLine >> token;
+				ABILITY_SCORES val;
+				if (saveProfsFromString(token, val)) {
+					int in;
+					procLine >> in;
+					if (!procLine) in = m_profBonus;
+					m_savingThrowProfs[val] = in;
+				}
+			}
+		}
+		else if (token == "ABILITYPROFS") {
+			while (line.find("ENDABILITYPROFS") != 0) {
+				std::getline(defStream, line);
+				if (!defStream) {
+					errStatus = "Error: stream ended in ability proficiencies.";
+					return false;
+				}
+				procLine.clear();
+				procLine.str(line);
+				procLine >> token;
+				CHECK_TYPE val;
+				if (checkProfsFromString(token, val)) {
+					int in;
+					procLine >> in;
+					if (!procLine) in = m_profBonus;
+					m_chkProfs[val] = in;
+				}
+			}
+		}
 		else if (token == "SLOTS") {
 			procLine
 				>> m_spellSlots[0]
@@ -263,12 +301,24 @@ void Player::takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foe
 void Player::takeDamage(Attack* attack) {
 	Creature::takeDamage(attack);
 	if (m_HP <= 0) {
+		if (m_HP < (-m_maxHP / 2)) {
+			m_dead = true;
+			return;
+		}
+		if (m_features & F_RELENTLESS_ENDURANCE) {
+			auto t = getTrkr<RelentlessEnduranceTrkr>();
+			if (t->isUsable()) {
+				LOG(m_name + " resists dying with Relentless Endurance feature!");
+				t->use();
+				m_HP = 1;
+				return;
+			}
+		}
 		m_alive = false;
 		m_stable = false;
 		m_deathSaves = 0;
 		m_deathFails = 0;
 	}
-	if (m_HP < (-m_maxHP / 2)) m_dead = true;
 }
 
 bool Player::deathCheck() {
@@ -345,8 +395,9 @@ int Player::_getAbltyMod(WEAPON_TYPE weapon) {
 	return bonus;
 }
 
-void Player::loadOffhandAttack(Attack& atk) {
+bool Player::loadOffhandAttack(Attack& atk, Creature* target) {
 	atk.load(m_loadouts[0], true);
+	return prepNextAttack(&atk, target);
 }
 
 void Player::getAttackList(std::vector<Attack*>& atks) {
@@ -387,7 +438,7 @@ void Player::_populateLoadouts(
 ) {
 	for (auto p = weps.begin(); p != weps.end(); ++p) {
 		WEAPON_TYPE wep = *p;
-		_tryInsertLoadout(new Loadout(wep, this, isProficient(wep, propProfs, profs), false));
+		_tryInsertLoadout(new Loadout(wep, this, isProficient(wep, propProfs, profs)));
 		if (shield) {
 			_tryInsertLoadout(new Loadout(wep, this, isProficient(wep, propProfs, profs), true));
 		}
@@ -396,6 +447,9 @@ void Player::_populateLoadouts(
 				if (q == p) continue;
 				_tryInsertLoadout(new Loadout(wep, this, isProficient(wep, propProfs, profs), false, *q, isProficient(*q, propProfs, profs)));
 			}
+		}
+		if (isVersatile(wep)) {
+			_tryInsertLoadout(new Loadout(wep, this, isProficient(wep, propProfs, profs), false, UNARMED, false, true));
 		}
 	}
 
@@ -432,26 +486,36 @@ void Player::_cleanupBonusActions() {
 	}), m_bonusActions.end());
 }
 
-bool Player::hasAttackProp(WEAPON_PROPS_BITS prop) {
-	for (auto& l : m_loadouts) {
-		if (l->getProps() & prop) {
-			return true;
+bool Player::hasAttackProp(WEAPON_PROPS_BITS prop, bool dual) {
+	if (!dual) {
+		for (auto& l : m_loadouts) {
+			if (l->getProps() & prop) {
+				return true;
+			}
 		}
+		return false;
 	}
-	return false;
+	else {
+		return m_loadouts[0]->getProps(dual) & prop;
+	}
 }
 
 void Player::incentivizeProp(WEAPON_PROPS_BITS prop) {
 	m_propIncentives |= prop;
 }
 
-int Player::getMaxAtkRange() {
+int Player::getMaxAtkRange(bool dual) {
 	int max = 0;
 	int mx, mn, dis;
-	for (auto& l : m_loadouts) {
-		wepMinMaxDisRange(l->getWepType(), mn, mx, dis);
-		if (mx > max) max = mx;
-		if (dis > max) max = dis;
+	if (!dual) {
+		for (auto& l : m_loadouts) {
+			wepMinMaxDisRange(l->getWepType(), mn, mx, dis);
+			if (mx > max) max = mx;
+			if (dis > max) max = dis;
+		}
+	}
+	else {
+		wepMinMaxDisRange(m_loadouts[0]->getWepType(dual), mn, max, dis);
 	}
 	return max;
 }

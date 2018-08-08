@@ -6,7 +6,7 @@
 #include "Ring.h"
 
 DashAction::DashAction(Creature* user) :
-	Action(DASH, user),
+	Action(DASH_ACTION, user),
 	m_enemyToApproach(nullptr)
 {}
 

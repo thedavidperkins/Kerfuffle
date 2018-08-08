@@ -75,6 +75,9 @@
     <ClCompile Include="src\Ring.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\FeatureAction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Creature.h">
@@ -140,12 +143,21 @@
     <ClInclude Include="inline\FeatureDefs.inl">
       <Filter>Inline Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\FeatureAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\defFiles.txt">
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="resources\sample.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="resources\milo.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="resources\parg.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

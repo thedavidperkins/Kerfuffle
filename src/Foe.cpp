@@ -81,6 +81,42 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 			procLine >> m_maxHP;
 			m_HP = m_maxHP;
 		}
+		else if (token == "SAVEPROFS") {
+			while (line.find("ENDSAVEPROFS") != 0) {
+				std::getline(defStream, line);
+				if (!defStream) {
+					errStatus = "Error: stream ended in save bonuses.";
+					return false;
+				}
+				procLine.clear();
+				procLine.str(line);
+				procLine >> token;
+				ABILITY_SCORES val;
+				if (saveProfsFromString(token, val)) {
+					int in;
+					procLine >> in;
+					m_savingThrowProfs[val] = in;
+				}
+			}
+		}
+		else if (token == "ABILITYPROFS") {
+			while (line.find("ENDABILITYPROFS") != 0) {
+				std::getline(defStream, line);
+				if (!defStream) {
+					errStatus = "Error: stream ended in ability proficiencies.";
+					return false;
+				}
+				procLine.clear();
+				procLine.str(line);
+				procLine >> token;
+				CHECK_TYPE val;
+				if (checkProfsFromString(token, val)) {
+					int in;
+					procLine >> in;
+					m_chkProfs[val] = in;
+				}
+			}
+		}
 		else if (token == "SLOTS") {
 			procLine
 				>> m_spellSlots[0]
@@ -194,13 +230,13 @@ void Foe::takeDamage(Attack* attack) {
 	}
 }
 
-bool Foe::hasAttackProp(WEAPON_PROPS_BITS prop) {
+bool Foe::hasAttackProp(WEAPON_PROPS_BITS prop, bool) {
 	// only check first attack, because that will be the first used 
 	// (until we implement intelligent reordering of attacks, if ever)
 	return m_attacks[0]->getProps() & prop;
 }
 
-int Foe::getMaxAtkRange() {
+int Foe::getMaxAtkRange(bool) {
 	int max = 0;
 	int mx, mn, dis;
 	for (auto& a : m_attacks) {

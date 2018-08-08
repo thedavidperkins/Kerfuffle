@@ -20,9 +20,10 @@ public:
 		WEAPON_TYPE wep,
 		Player* owner,
 		bool prof,
-		bool shield,
+		bool shield = false,
 		WEAPON_TYPE dual = UNARMED,
-		bool dualProf = false
+		bool dualProf = false,
+		bool usingTwoHanded = false
 	);
 	Loadout(const Loadout* rhs);
 
@@ -35,6 +36,7 @@ public:
 	int getAtkBonus(bool dual = false) const;
 	int getDmgBonus(bool dual = false) const;
 	std::function<int(void)> getDmgDice(bool dual = false) const;
+	std::function<int(void)> getSingleDie(bool dual = false) const;
 	DMG_TYPE getDmgType(bool dual = false) const;
 	WEAPON_TYPE getWepType(bool dual = false) const;
 	bool usingTwoHanded() const { return m_usingTwoHanded; }
@@ -51,7 +53,9 @@ private:
 	int m_dualAtkBonus;
 	int m_dmgBonus;
 	std::function<int(void)> m_dmgDice;
+	std::function<int(void)> m_singleDie;
 	std::function<int(void)> m_dualDmgDice;
+	std::function<int(void)> m_dualSingleDie;
 	DMG_TYPE m_dmgType;
 	DMG_TYPE m_dualDmgType;
 	WEAPON_PROPS m_wepProps;

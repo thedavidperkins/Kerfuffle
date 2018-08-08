@@ -8,10 +8,12 @@ Attack::Attack(Creature* agent) :
 	m_agent(agent),
 	m_atkBonus(0),
 	m_dmgDice(d0),
+	m_singleDie(d0),
 	m_dmgBonus(0),
 	m_dmgString(),
 	m_type(BLUDGEONING),
 	m_props(0),
+	m_curProps(0),
 	m_loaded(false),
 	m_advantage(false),
 	m_disadvantage(false),
@@ -25,6 +27,7 @@ void Attack::load(Loadout* loadout, bool dual) {
 	m_props = loadout->getProps(dual);
 	m_atkBonus = loadout->getAtkBonus(dual);
 	m_dmgDice = loadout->getDmgDice(dual);
+	m_singleDie = loadout->getSingleDie(dual);
 	m_dmgBonus = loadout->getDmgBonus(dual);
 	if (loadout->usingTwoHanded()) m_dmgString = wepDmgStringVersatile(loadout->getWepType());
 	else m_dmgString = wepDmgString(loadout->getWepType(dual));
@@ -44,7 +47,7 @@ void Attack::load(DMG_TYPE type, int atkBonus, const std::string& dmgString,
 {
 	m_props = props;
 	m_atkBonus = atkBonus;
-	m_dmgDice = funcFromStr(dmgString, m_dmgBonus);
+	m_dmgDice = funcFromStr(dmgString, m_dmgBonus, m_singleDie);
 	if (dmgBonus >= 0) {
 		m_dmgBonus = dmgBonus;
 	}
@@ -61,6 +64,7 @@ void Attack::load(const Attack& rhs) {
 	m_props = rhs.m_props;
 	m_atkBonus = rhs.m_atkBonus;
 	m_dmgDice = rhs.m_dmgDice;
+	m_singleDie = rhs.m_singleDie;
 	m_dmgBonus = rhs.m_dmgBonus;
 	m_dmgString = rhs.m_dmgString;
 	m_type = rhs.m_type;
@@ -74,6 +78,7 @@ void Attack::load(const Attack& rhs) {
 void Attack::unload() {
 	m_atkBonus = 0;
 	m_dmgDice = d0;
+	m_singleDie = d0;
 	m_dmgBonus = 0;
 	m_type = BLUDGEONING;
 	m_props = 0;
@@ -116,6 +121,11 @@ int Attack::dmg(Creature* target) {
 		int toAdd = m_dmgDice();
 		LOG(m_agent->getName() + " rolls the dice again for critting and gets " + std::to_string(toAdd));
 		ret += toAdd;
+		if (m_agent->getFeatures() & F_SAVAGE_ATTACKS) {
+			toAdd = m_singleDie();
+			LOG(m_agent->getName() + " rolls one more die for Savage Attacks and gets " + std::to_string(toAdd));
+			ret += toAdd;
+		}
 		m_crit = false;
 	}
 	LOG(m_agent->getName() + " adds damage bonus " + std::to_string(m_dmgBonus));
@@ -143,4 +153,68 @@ void Attack::getMinMaxDisRange(int& min, int& max, int& dis) {
 	min = m_minRange;
 	max = m_maxRange;
 	dis = m_disRange;
+}
+
+bool atkActionUsable(Creature* user, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies, bool dual) {
+	// check all adjacent enemies
+	for (const auto& en : user->getAdjCreatures(enemies)) {
+		if (en->isStanding()) {
+			return true;
+		}
+	}
+
+	// If we've made it this far, no standing enemies are adjacent 
+	// (i.e. in the eight cells immediately surrounding the user's cell)
+
+	// Next check for reach attack
+	if (user->hasAttackProp(REACH, dual)) {
+		for (const auto& en : user->getCreaturesInRange(enemies, 10)) {
+			if (en->isStanding()) {
+				if (!dual) user->incentivizeProp(REACH);
+				return true;
+			}
+		}
+	}
+
+	int range = user->getRemainingRange(); // movement range
+	int atkRange = user->getMaxAtkRange(); // attack range
+
+										   // Next check for ranged attack
+	if (user->hasAttackProp(RANGED, dual)) {
+		for (const auto& en : user->getCreaturesInRange(enemies, range + atkRange)) {
+			if (en->isStanding()) {
+				if (!dual) user->incentivizeProp(RANGED);
+				return true;
+			}
+		}
+	}
+
+	// Next check if you can close in on a target (need to get within 5 feet)
+	for (const auto& en : user->getCreaturesInRange(enemies, range + 5)) {
+		if (en->isStanding()) {
+			return true;
+		}
+	}
+
+	// Next check if you can close in on a target with reach (need to get within 10 feet)
+	if (user->hasAttackProp(REACH, dual)) {
+		for (const auto& en : user->getCreaturesInRange(enemies, range + 10)) {
+			if (en->isStanding()) {
+				if (!dual) user->incentivizeProp(REACH);
+				return true;
+			}
+		}
+	}
+
+	// Finally, check if you can do a thrown attack
+	if (user->hasAttackProp(THROWN, dual)) {
+		for (const auto& en : user->getCreaturesInRange(enemies, range + atkRange)) {
+			if (en->isStanding()) {
+				if (!dual) user->incentivizeProp(THROWN);
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

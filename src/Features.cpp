@@ -4,6 +4,7 @@
 #include "Creature.h"
 #include "Logger.h"
 #include "Player.h"
+#include "Ring.h"
 
 #define FEATURE_DEF(className, bitName, bitVal) \
 { #bitName, F_##bitName },
@@ -23,10 +24,15 @@ bool ftrFrmStr(const std::string& str, FEATURE_BIT& bit) {
 FeatureTrkr* FeatureTrkr::makeTracker(FEATURE_BIT type, Creature* owner) {
 	switch (type)
 	{
+	case F_LAY_ON_HANDS:
+		return new LayOnHandsTrkr(owner);
+	case F_RELENTLESS_ENDURANCE:
+		return new RelentlessEnduranceTrkr(owner);
 	case F_SNEAK_ATTACK:
 		return new SneakAttackTrkr(owner);
 	case F_LUCKY:
 	case F_BRAVE:
+	case F_SAVAGE_ATTACKS:
 	default:
 		return new EmptyTrkr(type, owner);
 	}
@@ -56,4 +62,48 @@ int SneakAttackTrkr::use() {
 	}
 	LOG(m_owner->getName() + " rolls extra " + std::to_string(numDice) + "d6 for sneak attack and gets " + std::to_string(snkBonus));
 	return snkBonus;
+}
+
+//===========================================================================
+
+LayOnHandsTrkr::LayOnHandsTrkr(Creature* owner) : 
+	ActionFeatureTrkr(F_LAY_ON_HANDS, owner),
+	m_pool(5 * dynamic_cast<Player*>(owner)->getLvl()),
+	m_target(nullptr)
+{}
+
+bool LayOnHandsTrkr::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
+	if (m_pool < 2) return false; // don't waste your time on 2 hp or less of healing available
+
+	// is there a need?
+	std::vector<Creature*> sorted = sortCreaturesByLeastHealth(friends);
+	for (auto& f : sorted) {
+		if (f->getHealthLost() < f->getHP()) { // Don't waste a turn on this unless the target is bloodied
+			return false;
+		}
+		if (!m_owner->getAdjCreatures({ f }).empty()) {
+			m_target = f;
+			return true;
+		}
+		if (!m_owner->getAdjCreatures(enemies).empty()) { // don't risk an opportunity attack-- TODO: allow risk of opportunity attack for exigency or if all opportunity attacks are exhausted
+			continue;
+		}
+		if (dist(f->getCell(), m_owner->getCell()) <= m_owner->getRemainingRange() + 5) {
+			m_target = f;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void LayOnHandsTrkr::invoke() {
+	int toHeal = m_target->getHealthLost();
+	if (toHeal > m_pool) {
+		toHeal = m_pool;
+	}
+	m_pool -= toHeal;
+	m_target->healBy(toHeal);
+	LOG(m_owner->getName() + " uses Lay On Hands to heal " + m_target->getName() + " for " + std::to_string(toHeal) + " HP.");
+	m_target = nullptr;
 }

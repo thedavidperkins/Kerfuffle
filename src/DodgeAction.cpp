@@ -2,7 +2,7 @@
 #include "Creature.h"
 #include "Logger.h"
 
-DodgeAction::DodgeAction(Creature* user) : Action(DODGE, user) {}
+DodgeAction::DodgeAction(Creature* user) : Action(DODGE_ACTION, user) {}
 
 bool DodgeAction::isUsable(const std::vector<Creature*>&, const std::vector<Creature*>&) {
 	return true;

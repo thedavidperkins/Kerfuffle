@@ -17,8 +17,8 @@ public:
 	virtual void getAttackList(std::vector<Attack*>& atks) override;
 	virtual void cleanupAttackList(std::vector<Attack*>& atks) override;
 	virtual Foe* makeCopy();
-	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop);
-	virtual int getMaxAtkRange();
+	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop, bool dual = false);
+	virtual int getMaxAtkRange(bool dual = false);
 
 private:
 	virtual bool _defineFromStream(std::stringstream& defStream, std::string& errStatus);

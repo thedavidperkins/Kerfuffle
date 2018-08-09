@@ -55,7 +55,8 @@ enum CHECK_TYPE {
 };
 
 enum CONDITION_BITS {
-	C_FRIGHTENED = 0x1
+	C_FRIGHTENED = 0x1,
+	C_CHARMED = 0x2
 };
 typedef unsigned int CONDITION;
 

@@ -33,6 +33,7 @@ FeatureTrkr* FeatureTrkr::makeTracker(FEATURE_BIT type, Creature* owner) {
 	case F_LUCKY:
 	case F_BRAVE:
 	case F_SAVAGE_ATTACKS:
+	case F_FEY_ANCESTRY:
 	default:
 		return new EmptyTrkr(type, owner);
 	}
@@ -85,7 +86,8 @@ bool LayOnHandsTrkr::isUsable(const std::vector<Creature*>& friends, const std::
 			m_target = f;
 			return true;
 		}
-		if (!m_owner->getAdjCreatures(enemies).empty()) { // don't risk an opportunity attack-- TODO: allow risk of opportunity attack for exigency or if all opportunity attacks are exhausted
+		if (!m_owner->getAdjCreatures(enemies).empty()) { // don't risk an opportunity attack-- TODO: allow risk of opportunity attack for exigency or if all opportunity attacks are exhausted 
+		//TODO: Allow motion when it means staying close to the enemy
 			continue;
 		}
 		if (dist(f->getCell(), m_owner->getCell()) <= m_owner->getRemainingRange() + 5) {

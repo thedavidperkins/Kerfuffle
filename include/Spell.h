@@ -3,43 +3,42 @@
 
 #include <vector>
 
+class Creature;
+
 const int SPELL_LVL_COUNT = 9;
 
-enum SPELL_PRIORITY_BITS {
-	DMG_PRIORITY = 0x1,
-	SUPP_PRIORITY = 0x2,
-	HEAL_PRIORITY = 0x4,
-	HARASS_PRIORITY = 0x8,
-	SELF_HEAL_PRIORITY = 0x10,
-	SELF_SUPP_PRIORITY = 0x20
-};
-typedef unsigned int SPELL_PRIORITY;
+#define SPELL_DEF(className, spellName) \
+	S_##spellName,
 
-enum TARGET_TYPE {
-	SINGLE,
-	MULTI,
-	AREA
+enum SPELLS {
+	S_INVALID_SPELL = 0,
+#include "SpellDefs.inl"
+	N_SPELLS
 };
-
-class Creature;
 
 class Spell {
 public:
-	int lvl() const { return m_lvl; }
-	SPELL_PRIORITY priority() const { return m_priority; }
+	Spell(SPELLS spl, Creature* user) : m_spl(spl), m_user(user) {}
 
-	std::string getName() const { return m_name; }
-
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies) = 0;
 	virtual void cast() = 0;
-	virtual bool identifyTargets(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies) = 0;
-protected:
-	std::string m_name;
+private:
+	SPELLS m_spl;
+	int m_lvl; // spell level
 	Creature* m_user;
-	std::vector<Creature*> m_targets;
-	int m_lvl;
-	SPELL_PRIORITY m_priority;
-	TARGET_TYPE m_targetType;
 };
 
-#endif // !KERF_SPELL_H
+#define SPELL_DEF(className, spellName)																	\
+class className##Spell : public Spell {																	\
+public:																									\
+	className##Spell(Creature* user) : Spell(S_##spellName, user) {}									\
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies);	\
+	virtual void cast();																				\
+}
+
+#include "SpellDefs.inl"
+
+bool splFrmStr(const std::string& str, SPELLS spl);
+
+#endif//KERF_SPELL_H
 

@@ -339,7 +339,8 @@ int Creature::rolld20Dis(ROLL_TYPE rollType) {
 
 int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
 	int roll;
-	if ((threat & C_FRIGHTENED) && (m_features & F_BRAVE)) {
+	if (((threat & C_FRIGHTENED) && (m_features & F_BRAVE)) ||
+		((threat & C_CHARMED) && (m_features & F_FEY_ANCESTRY))) {
 		roll = rolld20Adv(R_SAVING_THROW);
 	}
 	else {

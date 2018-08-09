@@ -50,6 +50,7 @@ public:															\
 EMPTY_TRKR(LuckyTrkr, F_LUCKY);
 EMPTY_TRKR(BraveTrkr, F_BRAVE);
 EMPTY_TRKR(SavageAttacksTrkr, F_SAVAGE_ATTACKS);
+EMPTY_TRKR(FeyAncestryTrkr, F_FEY_ANCESTRY);
 
 //=================================================================================
 
@@ -108,7 +109,7 @@ template <class T>
 inline FEATURE_BIT classBit() { return 0; }
 
 #define FEATURE_DEF(className, bitName, bitVal) \
-template <> inline FEATURE_BIT classBit<className>() { return F_##bitName; }
+template <> inline FEATURE_BIT classBit<className##Trkr>() { return F_##bitName; }
 
 #include "FeatureDefs.inl"
 

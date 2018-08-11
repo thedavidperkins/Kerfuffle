@@ -37,6 +37,7 @@
     <ClCompile Include="src\OffhandAttack.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Ring.cpp" />
+    <ClCompile Include="src\Spell.cpp" />
     <ClCompile Include="src\SpellAction.cpp" />
     <ClCompile Include="src\Weapons.cpp" />
   </ItemGroup>
@@ -69,6 +70,9 @@
     <Text Include="resources\milo.txt" />
     <Text Include="resources\parg.txt" />
     <Text Include="resources\sample.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="inline\SpellDefs.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

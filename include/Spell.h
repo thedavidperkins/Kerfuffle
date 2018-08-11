@@ -18,6 +18,8 @@ enum SPELLS {
 
 class Spell {
 public:
+	Spell * makeSpell(SPELLS spl, Creature* user);
+
 	Spell(SPELLS spl, Creature* user) : m_spl(spl), m_user(user) {}
 
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies) = 0;
@@ -26,6 +28,7 @@ private:
 	SPELLS m_spl;
 	int m_lvl; // spell level
 	Creature* m_user;
+	std::string m_name;
 };
 
 #define SPELL_DEF(className, spellName)																	\

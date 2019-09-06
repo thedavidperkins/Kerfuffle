@@ -197,7 +197,6 @@ protected:
 	// spells
 	int m_spellSlots[SPELL_LVL_COUNT];
 	std::vector<Spell*> m_spellbook;
-	std::vector<SPELL_PRIORITY> m_spellPriorities;
 
 	// dodge
 	bool m_dodge;

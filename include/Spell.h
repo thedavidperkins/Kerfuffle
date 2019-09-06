@@ -22,8 +22,9 @@ public:
 
 	Spell(SPELLS spl, Creature* user) : m_spl(spl), m_user(user) {}
 
-	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies) = 0;
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) = 0;
 	virtual void cast() = 0;
+	std::string getName() { return m_name; }
 private:
 	SPELLS m_spl;
 	int m_lvl; // spell level
@@ -35,9 +36,9 @@ private:
 class className##Spell : public Spell {																	\
 public:																									\
 	className##Spell(Creature* user) : Spell(S_##spellName, user) {}									\
-	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies);	\
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);	\
 	virtual void cast();																				\
-}
+};
 
 #include "SpellDefs.inl"
 

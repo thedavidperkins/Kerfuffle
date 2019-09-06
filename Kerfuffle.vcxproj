@@ -37,7 +37,10 @@
     <ClCompile Include="src\OffhandAttack.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Ring.cpp" />
-    <ClCompile Include="src\Spell.cpp" />
+    <ClCompile Include="src\Spell.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="src\SpellAction.cpp" />
     <ClCompile Include="src\Weapons.cpp" />
   </ItemGroup>

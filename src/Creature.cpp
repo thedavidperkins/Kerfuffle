@@ -230,25 +230,6 @@ Creature* Creature::chooseAttackTarget(const std::vector<Creature*>& enemies) {
 }
 
 // later on this may be more context sensitive
-void Creature::_setSpellPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
-	m_spellPriorities.clear();
-	if (m_archetype == SUPPORT_CASTER) {
-		m_spellPriorities.push_back(HEAL_PRIORITY);
-		m_spellPriorities.push_back(SELF_HEAL_PRIORITY);
-		m_spellPriorities.push_back(SUPP_PRIORITY);
-		m_spellPriorities.push_back(SELF_SUPP_PRIORITY);
-		m_spellPriorities.push_back(HARASS_PRIORITY);
-		m_spellPriorities.push_back(DMG_PRIORITY);
-	}
-	m_spellPriorities.push_back(DMG_PRIORITY);
-	m_spellPriorities.push_back(SELF_HEAL_PRIORITY);
-	m_spellPriorities.push_back(HARASS_PRIORITY);
-	m_spellPriorities.push_back(HEAL_PRIORITY);
-	m_spellPriorities.push_back(SUPP_PRIORITY);
-	m_spellPriorities.push_back(SELF_SUPP_PRIORITY);
-}
-
-// later on this may be more context sensitive
 void Creature::_setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
 	m_actionPriorities[0] = FEATURE_ACTION;
 	m_actionPriorities[1] = SPELL_ACTION;
@@ -256,35 +237,6 @@ void Creature::_setActionPriorities(const std::vector<Creature*>& friends, const
 	m_actionPriorities[3] = DASH_ACTION;
 	m_actionPriorities[4] = DODGE_ACTION;
 	m_actionPriorities[5] = DISENGAGE_ACTION;
-}
-
-Spell* Creature::chooseSpell(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
-	if (m_spellCast == 0) return nullptr;
-	_setSpellPriorities(friends, enemies);
-	std::vector<Spell*> spellChoices;
-
-	int maxLvl = 0;
-	for (int iter = 0; iter < SPELL_LVL_COUNT; ++iter) {
-		if (m_spellSlots[iter] > 0) maxLvl = iter + 1;
-	}
-
-	// choose spells according to priority
-	for (auto& pr : m_spellPriorities) {
-		for (auto& spl : m_spellbook) {
-			// exclude any spells for which no slots are available
-			if (spl->lvl() <= maxLvl) {
-				if(spl->priority() == pr) spellChoices.push_back(spl);
-			}
-		}
-	}
-
-	for (auto& spl : spellChoices) {
-		if (spl->identifyTargets(friends, enemies)) {
-			return spl;
-		}
-	}
-
-	return nullptr;
 }
 
 int Creature::rolld20(ROLL_TYPE rollType) {

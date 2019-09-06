@@ -99,8 +99,6 @@ public:
 
 	Creature* chooseAttackTarget(const std::vector<Creature*>& enemies);
 
-	Spell* chooseSpell(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
-
 	void setDodge(bool d) { m_dodge = d; }
 
 	virtual Creature* makeCopy() = 0;

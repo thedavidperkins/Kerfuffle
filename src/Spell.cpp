@@ -17,7 +17,7 @@ bool splFrmStr(const std::string& str, SPELLS spl) {
 }
 
 #define SPELL_DEF(className, spellName)		\
-	case:									\
+	case S_##spellName:									\
 		return new className##Spell(user);
 
 Spell* Spell::makeSpell(SPELLS spl, Creature* user) {
@@ -28,3 +28,13 @@ Spell* Spell::makeSpell(SPELLS spl, Creature* user) {
 		return nullptr;
 	}
 }
+
+
+// Dummy implementations for all virtual spell functions for now, just to quiet the compiler
+#define SPELL_DEF(className, spellName)																\
+bool className##Spell::isUsable(const std::vector<Creature*>&, const std::vector<Creature*>& ) {	\
+	return false;																					\
+}																									\
+void className##Spell::cast() {}																									
+
+#include "SpellDefs.inl"

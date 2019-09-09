@@ -7,9 +7,13 @@ class Creature;
 
 class DashAction : public Action {
 public:
-	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
-	virtual void invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
 	DashAction(Creature* user);
+
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	virtual bool invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
+	virtual void resetActionState() { m_enemyToApproach = nullptr; }
+
+	virtual void setPriorityWeight(ARCHETYPE arch);
 private:
 	Creature* m_enemyToApproach;
 };

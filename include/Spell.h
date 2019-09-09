@@ -7,8 +7,9 @@ class Creature;
 
 const int SPELL_LVL_COUNT = 9;
 
-#define SPELL_DEF(className, spellName) \
+#define SPELL_DEF(className, spellName, isAction) \
 	S_##spellName,
+
 
 enum SPELLS {
 	S_INVALID_SPELL = 0,
@@ -16,33 +17,39 @@ enum SPELLS {
 	N_SPELLS
 };
 
+
 class Spell {
 public:
-	Spell * makeSpell(SPELLS spl, Creature* user);
+	static Spell* makeSpell(SPELLS spl, Creature* user);
 
 	Spell(SPELLS spl, Creature* user) : m_spl(spl), m_user(user) {}
 
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) = 0;
-	virtual void cast() = 0;
-	std::string getName() { return m_name; }
+	virtual bool cast() = 0;
+	std::string getName() const { return m_name; }
+	SPELLS getSpellType() const { return m_spl; }
+	virtual void reset() {}																				\
 private:
 	SPELLS m_spl;
-	int m_lvl; // spell level
+	uint16_t m_lvlBits; // spell levels available
 	Creature* m_user;
 	std::string m_name;
 };
 
-#define SPELL_DEF(className, spellName)																	\
-class className##Spell : public Spell {																	\
-public:																									\
-	className##Spell(Creature* user) : Spell(S_##spellName, user) {}									\
+
+#define SPELL_DEF(className, spellName, isAction)															\
+class className##Spell : public Spell {																		\
+public:																										\
+	className##Spell(Creature* user) : Spell(S_##spellName, user) {}										\
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);	\
-	virtual void cast();																				\
+	virtual bool cast();																					\
 };
+
 
 #include "SpellDefs.inl"
 
-bool splFrmStr(const std::string& str, SPELLS spl);
+bool splFrmStr(const std::string& str, SPELLS& spl);
+bool isActionSpell(SPELLS spell);
 
 #endif//KERF_SPELL_H
 

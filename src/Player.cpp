@@ -165,9 +165,23 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 		}
 		else if (token == "SPELLS") {
 			std::getline(defStream, line);
-			if (line.find("ENDSPELLS") != 0) {
-				errStatus = "Error: spell initialization not yet implemented.";
-				return false;
+			while (line.find("ENDSPELLS") != 0) {
+				if (!defStream) {
+					errStatus = "Error: met premature end of definition stream. (Spell list)";
+					return false;
+				}
+				SPELLS spellType = S_INVALID_SPELL;
+				procLine.clear();
+				procLine.str(line);
+				procLine >> token;
+				if (!splFrmStr(token, spellType) || spellType == S_INVALID_SPELL || spellType >= N_SPELLS)
+				{
+					errStatus = "Error: unrecognized spell token: " + token;
+					return false;
+				}
+				m_spellList.push_back(spellType);
+
+				std::getline(defStream, line);
 			}
 		}
 		else if (token == "LOADOUT") {
@@ -178,7 +192,7 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 			while (line.find("ENDLOADOUT") != 0) {
 				std::getline(defStream, line);
 				if (!defStream) {
-					errStatus = "Error: met premature end of definition stream.";
+					errStatus = "Error: met premature end of definition stream. (Loadout)";
 					return false;
 				}
 				procLine.clear();
@@ -194,7 +208,7 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 					std::getline(defStream, line);
 					while (line.find(end) != 0) {
 						if (!defStream) {
-							errStatus = "Error: met premature end of definition stream.";
+							errStatus = "Error: met premature end of definition stream. (Weapon list)";
 							return false;
 						}
 						procLine.clear();
@@ -213,7 +227,7 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 					std::getline(defStream, line);
 					while (line.find("ENDPPROF") != 0) {
 						if (!defStream) {
-							errStatus = "Error: met premature end of definition stream.";
+							errStatus = "Error: met premature end of definition stream. (PProf)";
 							return false;
 						}
 						procLine.clear();
@@ -301,10 +315,6 @@ void Player::takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foe
 void Player::takeDamage(Attack* attack) {
 	Creature::takeDamage(attack);
 	if (m_HP <= 0) {
-		if (m_HP < (-m_maxHP / 2)) {
-			m_dead = true;
-			return;
-		}
 		if (m_features & F_RELENTLESS_ENDURANCE) {
 			auto t = getTrkr<RelentlessEnduranceTrkr>();
 			if (t->isUsable()) {
@@ -316,11 +326,21 @@ void Player::takeDamage(Attack* attack) {
 		}
 		m_alive = false;
 		m_stable = false;
-		m_deathSaves = 0;
-		m_deathFails = 0;
+		if (m_HP < (-m_maxHP / 2)) {
+			LOG(m_name + " dies with hp pushed to " + std::to_string(m_HP) + " versus max hp " + std::to_string(m_maxHP) );
+			m_dead = true;
+		}
+		else {
+			LOG(m_name + " falls and begins death saving throws.");
+			m_HP = 0;
+			m_deathSaves = 0;
+			m_deathFails = 0;
+		}
 	}
 }
 
+
+// Only return true on crit success, i.e. the player gets a new turn with 1 hp
 bool Player::deathCheck() {
 	int roll = d20();
 	LOG(m_name + " rolls " + std::to_string(roll) + " on their death save.");

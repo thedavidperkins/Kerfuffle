@@ -5,9 +5,12 @@
 
 class DisengageAction : public Action {
 public:
-	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
-	virtual void invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
 	DisengageAction(Creature* user);
+
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	virtual bool invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
+
+	virtual void setPriorityWeight(ARCHETYPE arch);
 };
 
 #endif // !KERF_DISENGAGE_ACTION_H

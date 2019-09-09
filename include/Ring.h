@@ -50,7 +50,7 @@ public:
 	std::vector<Cell*> getNeighboringCells(Cell* c);
 	std::vector<Cell*> sortCellsBy(std::function<bool(const Cell*, const Cell*)> pred);
 	std::vector<Cell*> sortCellsByDistance(Cell* c);
-	std::vector<Cell*> cellsInRange(Cell* c, int range);
+	std::vector<Cell*> cellsInRange(Cell* c, float range);
 
 	void reset();
 private:
@@ -61,9 +61,9 @@ private:
 	Cell m_arena[RING_SIZE][RING_SIZE];
 };
 
-int dist(int x1, int y1, int x2, int y2);
-int dist(const Cell* a, int x, int y);
-int dist(const Cell* a, const Cell* b);
+float dist(int x1, int y1, int x2, int y2);
+float dist(const Cell* a, int x, int y);
+float dist(const Cell* a, const Cell* b);
 
 #endif // !KERF_RING_H
 

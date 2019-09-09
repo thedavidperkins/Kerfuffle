@@ -1,29 +1,26 @@
 #include "Creature.h"
 #include "FeatureAction.h"
 
-static std::vector<FEATURE_BIT> lFeaturesWithActions{
-	F_LAY_ON_HANDS
-};
 
-FeatureAction::FeatureAction(Creature* user) :
-	Action(FEATURE_ACTION, user),
-	m_toUse(nullptr)
+FeatureAction::FeatureAction(FEATURE_BIT feature, Creature* user, ActionFeatureTrkr* tracker)
+	: Action(FEATURE_ACTION, user)
+	, m_feature(feature)
+	, m_featureTracker(tracker)
 {}
 
-bool FeatureAction::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
-	for (auto& f : lFeaturesWithActions) {
-		if (f & m_user->getFeatures()) {
-			m_toUse = dynamic_cast<ActionFeatureTrkr*>(m_user->getTrkr(f));
-			if (m_toUse->isUsable(friends, enemies)) return true;
-		}
-	}
 
-	delete this;
-	return false;
+bool FeatureAction::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
+	return m_featureTracker->isUsable(friends, enemies);
 }
 
-void FeatureAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) {
-	m_toUse->invoke();
+
+bool FeatureAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) {
+	bool invoked = m_featureTracker->invoke();
 	m_user->usedAction();
-	delete this;
+	return invoked;
+}
+
+
+void FeatureAction::setPriorityWeight(ARCHETYPE arch) {
+	m_weight = 100;
 }

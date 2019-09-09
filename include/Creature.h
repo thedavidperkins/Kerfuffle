@@ -6,12 +6,13 @@
 #include <sstream>
 #include <map>
 
-#include "Weapons.h"
-#include "Attack.h"
-#include "Spell.h"
+#include "Archetypes.h"
 #include "Features.h"
+#include "Spell.h"
+#include "Weapons.h"
 
 class Cell;
+class Action;
 class Attack;
 
 enum ABILITY_SCORES {
@@ -22,14 +23,6 @@ enum ABILITY_SCORES {
 	WIS,
 	CHA,
 	N_ABILITY_SCORES
-};
-
-enum ARCHETYPE {
-	BRAWLER,
-	ROGUE,
-	RANGER,
-	DAMAGE_CASTER,
-	SUPPORT_CASTER
 };
 
 enum CHECK_TYPE {
@@ -125,29 +118,32 @@ public:
 
 	std::vector<Creature*> getAdjCreatures();
 	std::vector<Creature*> getAdjCreatures(const std::vector<Creature*>& candidates); // restrict list to intersection with candidates
-	std::vector<Creature*> getCreaturesInRange(int range);
-	std::vector<Creature*> getCreaturesInRange(const std::vector<Creature*>& candidates, int range); // restrict list to intersection with candidates
+	std::vector<Creature*> getCreaturesInRange(float range);
+	std::vector<Creature*> getCreaturesInRange(const std::vector<Creature*>& candidates, float range); // restrict list to intersection with candidates
 
-	int getRemainingRange();
+	float getRemainingRange();
 	Cell* getCell() { return m_cell; }
 	bool moveToRangeOf(Creature* target, int range);
 	bool moveToAdjacent(Creature* target);
 	bool moveToCell(Cell* dest);
 
 	void dash();
-	Creature* findNearest(const std::vector<Creature*> crtrs, int& distance);
+	void cancelDash();
+
+	Creature* findNearest(const std::vector<Creature*> crtrs, float& distance);
 
 	void setFriends(std::vector<Creature*>* friends) { m_friends = friends; }
 	std::vector<Creature*>* getFriends() { return m_friends; }
-
 protected:
 	Creature();
 	Creature(const Creature* rhs);
 
+	void _loadDefaultActions();
 	virtual bool _defineFromStream(std::stringstream& defStream, std::string& errStatus) = 0;
 	void _setupFtreTrkrs();
 	void _resetFtreTrkrs();
-	void _setSpellPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	void _setupSpellTrkrs();
+	void _resetSpellTrkrs();
 	void _setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 	void _idCell();
 	bool _checkRangedAttack(Attack* atk, Creature* target);
@@ -181,7 +177,7 @@ protected:
 	int m_reaction;
 	int m_spellCast;
 
-	ACTION_TYPE m_actionPriorities[N_ACTION_TYPE];
+	std::vector<Action*> m_actionsAvailable;
 
 	// death save counters
 	int m_deathSaves;
@@ -194,7 +190,8 @@ protected:
 
 	// spells
 	int m_spellSlots[SPELL_LVL_COUNT];
-	std::vector<Spell*> m_spellbook;
+	std::vector<SPELLS> m_spellList;
+	std::map<SPELLS, Spell*> m_spellbook;
 
 	// dodge
 	bool m_dodge;
@@ -219,7 +216,7 @@ protected:
 	int m_y;
 	Cell* m_cell;
 	int m_speed;
-	int m_movementRemaining;
+	float m_movementRemaining;
 };
 
 bool checkProfsFromString(const std::string& token, CHECK_TYPE& val);

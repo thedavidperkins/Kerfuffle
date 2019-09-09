@@ -115,18 +115,25 @@ bool Encounter::_foesAlive() {
 	for (auto& f : m_foes) {
 		if (f->isStanding()) return true;
 	}
-	//std::cout << "All foes have died." << std::endl;
 	return false;
 }
 
 bool Encounter::_partyAlive() {
+	bool allFallen = true;
 	for (auto& p : m_party) {
 		if (p->isDead()) {
-			//std::cout << p->getName() << " has died." << std::endl;
+			LOG(p->getName() + " died.");
 			return false;
 		}
+		else if (p->isStanding())
+		{
+			allFallen = false;
+		}
 	}
-	return true;
+	if (allFallen) {
+		LOG("All players have fallen.");
+	}
+	return !allFallen;
 }
 
 bool Encounter::fight(int write) {
@@ -163,7 +170,6 @@ bool Encounter::fight(int write) {
 	int counter = 0;
 	bool ret = false;
 	while (counter++ < timeOut) {
-
 		LOG("- - - - - - - - - - - - - - - - - - - - - - - - - - -");
 		for (auto& cur : turnOrder) {
 			if (cur->isStanding()) {

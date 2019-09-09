@@ -6,7 +6,7 @@
 #include "Player.h"
 #include "Ring.h"
 
-#define FEATURE_DEF(className, bitName, bitVal) \
+#define FEATURE_DEF(className, bitName, bitVal, isAction) \
 { #bitName, F_##bitName },
 
 static std::map<std::string, FEATURE_BIT> lFeatureNames{
@@ -80,8 +80,13 @@ bool LayOnHandsTrkr::isUsable(const std::vector<Creature*>& friends, const std::
 	std::vector<Creature*> sorted = sortCreaturesByLeastHealth(friends);
 	for (auto& f : sorted) {
 		if (f->getHealthLost() < f->getHP()) { // Don't waste a turn on this unless the target is bloodied
-			return false;
+			continue;
 		}
+		if (f == m_owner) { // can always LoH self
+			m_target = f;
+			return true;
+		}
+
 		if (!m_owner->getAdjCreatures({ f }).empty()) {
 			m_target = f;
 			return true;
@@ -99,7 +104,19 @@ bool LayOnHandsTrkr::isUsable(const std::vector<Creature*>& friends, const std::
 	return false;
 }
 
-void LayOnHandsTrkr::invoke() {
+bool LayOnHandsTrkr::invoke() {
+	if (m_target != m_owner) {
+		if (m_owner->getAdjCreatures({ m_target }).empty()) {
+			m_owner->moveToAdjacent(m_target);
+		}
+
+		if (m_owner->getAdjCreatures({ m_target }).empty()) {
+			LOG(m_owner->getName() + " failed to get close enough to use Lay on Hands on " + m_target->getName());
+			m_target = nullptr;
+			return false;
+		}
+	}
+
 	int toHeal = m_target->getHealthLost();
 	if (toHeal > m_pool) {
 		toHeal = m_pool;
@@ -108,4 +125,20 @@ void LayOnHandsTrkr::invoke() {
 	m_target->healBy(toHeal);
 	LOG(m_owner->getName() + " uses Lay On Hands to heal " + m_target->getName() + " for " + std::to_string(toHeal) + " HP.");
 	m_target = nullptr;
+	return true;
+}
+
+
+#define FEATURE_DEF(className, bitName, bitVal, isAction)			\
+	case F_##bitName:												\
+		return isAction;
+
+
+bool isActionFeature(FEATURE_BIT feature) {
+	switch (feature)
+	{
+#include "FeatureDefs.inl"
+	default:
+		return false;
+	}
 }

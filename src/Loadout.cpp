@@ -126,8 +126,8 @@ int Loadout::getScore(Creature* target, LOADOUT_PRIORITY priority, WEAPON_PROPS 
 		if (target != nullptr) { // check appropriate range of weapon to hit target
 			int min, max, dis;
 			wepMinMaxDisRange(m_wepType, min, max, dis);
-			int distance = dist(m_owner->getCell(), target->getCell());
-			int moveRange = m_owner->getRemainingRange();
+			float distance = dist(m_owner->getCell(), target->getCell());
+			float moveRange = m_owner->getRemainingRange();
 			if (distance < min) ret -= 15;
 			if (distance - moveRange > max) ret -= 15;
 			if (distance - moveRange > dis) ret -= 85;

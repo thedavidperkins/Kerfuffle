@@ -1,69 +1,76 @@
 #include <algorithm>
 
+#include "Action.h"
 #include "Attack.h"
 #include "Creature.h"
 #include "Dice.h"
-#include "Action.h"
+#include "FeatureAction.h"
 #include "Logger.h"
 #include "Ring.h"
+#include "SpellAction.h"
 
-Creature::Creature() :
-	m_name(),
-	m_abilityMods{ 0, 0, 0, 0, 0, 0 },
-	m_savingThrowProfs{ 0, 0, 0, 0, 0, 0 },
-	m_chkProfs{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-	m_AC(0),
-	m_spellDC(0),
-	m_init(0),
-	m_alive(true),
-	m_dead(false),
-	m_stable(false),
-	m_archetype(BRAWLER),
-	m_actions(1),
-	m_reaction(1),
-	m_spellCast(1),
-	m_actionPriorities{ FEATURE_ACTION, SPELL_ACTION, ATTACK_ACTION, DASH_ACTION, DISENGAGE_ACTION, DODGE_ACTION },
-	m_deathSaves(0),
-	m_deathFails(0),
-	m_maxHP(0),
-	m_HP(m_maxHP),
-	m_tempHP(0),
-	m_spellSlots{ 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-	m_spellbook(),
-	m_dodge(false),
-	m_copy(nullptr),
-	m_features(0),
-	m_ftreTrkrs(),
-	m_condition(0),
-	m_hadAdvantage(false),
-	m_hadDisadvantage(false),
-	m_friends(nullptr),
-	m_x(0),
-	m_y(0),
-	m_cell(nullptr),
-	m_speed(25),
-	m_movementRemaining(m_speed)
-{}
 
-Creature::Creature(const Creature* rhs) :
-	m_name(rhs->m_name),
-	m_abilityMods{
+Creature::Creature()
+	: m_name()
+	, m_abilityMods{ 0, 0, 0, 0, 0, 0 }
+	, m_savingThrowProfs{ 0, 0, 0, 0, 0, 0 }
+	, m_chkProfs{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+	, m_AC(0)
+	, m_spellDC(0)
+	, m_init(0)
+	, m_alive(true)
+	, m_dead(false)
+	, m_stable(false)
+	, m_archetype(BRAWLER)
+	, m_actions(1)
+	, m_reaction(1)
+	, m_spellCast(1)
+	, m_actionsAvailable()
+	, m_deathSaves(0)
+	, m_deathFails(0)
+	, m_maxHP(0)
+	, m_HP(m_maxHP)
+	, m_tempHP(0)
+	, m_spellSlots{ 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+	, m_spellList()
+	, m_spellbook()
+	, m_dodge(false)
+	, m_copy(nullptr)
+	, m_features(0)
+	, m_ftreTrkrs()
+	, m_condition(0)
+	, m_hadAdvantage(false)
+	, m_hadDisadvantage(false)
+	, m_friends(nullptr)
+	, m_x(0)
+	, m_y(0)
+	, m_cell(nullptr)
+	, m_speed(25)
+	, m_movementRemaining((float)m_speed)
+{
+	_loadDefaultActions();
+}
+
+
+Creature::Creature(const Creature* rhs)
+	: m_name(rhs->m_name)
+	, m_abilityMods{
 		rhs->m_abilityMods[STR], 
 		rhs->m_abilityMods[DEX], 
 		rhs->m_abilityMods[CON], 
 		rhs->m_abilityMods[INT], 
 		rhs->m_abilityMods[WIS], 
 		rhs->m_abilityMods[CHA]
-	},
-	m_savingThrowProfs{
+	}
+	, m_savingThrowProfs{
 		rhs->m_savingThrowProfs[STR],
 		rhs->m_savingThrowProfs[DEX],
 		rhs->m_savingThrowProfs[CON],
 		rhs->m_savingThrowProfs[INT],
 		rhs->m_savingThrowProfs[WIS],
 		rhs->m_savingThrowProfs[CHA]
-	},
-	m_chkProfs{
+	}
+	, m_chkProfs{
 		rhs->m_chkProfs[ACRO_CHK],
 		rhs->m_chkProfs[ANIM_CHK],
 		rhs->m_chkProfs[ARCA_CHK],
@@ -82,30 +89,24 @@ Creature::Creature(const Creature* rhs) :
 		rhs->m_chkProfs[SLEI_CHK],
 		rhs->m_chkProfs[STEA_CHK],
 		rhs->m_chkProfs[SURV_CHK]
-	},
-	m_AC(rhs->m_AC),
-	m_spellDC(rhs->m_spellDC),
-	m_init(0),
-	m_alive(true),
-	m_dead(false),
-	m_stable(false),
-	m_archetype(rhs->m_archetype),
-	m_actions(1),
-	m_reaction(1),
-	m_spellCast(1),
-	m_actionPriorities{ 
-		rhs->m_actionPriorities[0],
-		rhs->m_actionPriorities[1],
-		rhs->m_actionPriorities[2], 
-		rhs->m_actionPriorities[3], 
-		rhs->m_actionPriorities[4]
-	},
-	m_deathSaves(0),
-	m_deathFails(0),
-	m_maxHP(rhs->m_maxHP),
-	m_HP(m_maxHP),
-	m_tempHP(0),
-	m_spellSlots{
+	}
+	, m_AC(rhs->m_AC)
+	, m_spellDC(rhs->m_spellDC)
+	, m_init(0)
+	, m_alive(true)
+	, m_dead(false)
+	, m_stable(false)
+	, m_archetype(rhs->m_archetype)
+	, m_actions(1)
+	, m_reaction(1)
+	, m_spellCast(1)
+	, m_actionsAvailable()
+	, m_deathSaves(0)
+	, m_deathFails(0)
+	, m_maxHP(rhs->m_maxHP)
+	, m_HP(m_maxHP)
+	, m_tempHP(0)
+	, m_spellSlots{
 		rhs->m_spellSlots[0],
 		rhs->m_spellSlots[1],
 		rhs->m_spellSlots[2],
@@ -115,29 +116,47 @@ Creature::Creature(const Creature* rhs) :
 		rhs->m_spellSlots[6],
 		rhs->m_spellSlots[7],
 		rhs->m_spellSlots[8],
-	},
-	m_spellbook(rhs->m_spellbook),
-	m_dodge(false),
-	m_copy(nullptr),
-	m_features(rhs->m_features),
-	m_ftreTrkrs(),
-	m_condition(rhs->m_condition),
-	m_hadAdvantage(false),
-	m_hadDisadvantage(false),
-	m_friends(nullptr),
-	m_x(rhs->m_x),
-	m_y(rhs->m_y),
-	m_cell(nullptr),
-	m_speed(rhs->m_speed),
-	m_movementRemaining(m_speed)
-{}
+	}
+	, m_spellList(rhs->m_spellList)
+	, m_spellbook(rhs->m_spellbook)
+	, m_dodge(false)
+	, m_copy(nullptr)
+	, m_features(rhs->m_features)
+	, m_ftreTrkrs()
+	, m_condition(rhs->m_condition)
+	, m_hadAdvantage(false)
+	, m_hadDisadvantage(false)
+	, m_friends(nullptr)
+	, m_x(rhs->m_x)
+	, m_y(rhs->m_y)
+	, m_cell(nullptr)
+	, m_speed(rhs->m_speed)
+	, m_movementRemaining((float)m_speed)
+{
+	_loadDefaultActions();
+}
+
+
+void Creature::_loadDefaultActions() {
+	m_actionsAvailable.push_back(Action::newAction(ATTACK_ACTION, this));
+	m_actionsAvailable.push_back(Action::newAction(DASH_ACTION, this));
+	m_actionsAvailable.push_back(Action::newAction(DISENGAGE_ACTION, this));
+	m_actionsAvailable.push_back(Action::newAction(DODGE_ACTION, this));
+}
+
 
 void Creature::init() {
 	_setupFtreTrkrs();
 	_idCell();
 }
 
+
 Creature::~Creature() {
+	for (Action* action : m_actionsAvailable)
+	{
+		delete action;
+	}
+
 	if (m_copy != nullptr) {
 		delete m_copy;
 		m_copy = nullptr;
@@ -145,15 +164,20 @@ Creature::~Creature() {
 	for (auto& item : m_ftreTrkrs) {
 		delete item.second;
 	}
+	for (auto& spell : m_spellbook) {
+		delete spell.second;
+	}
 	if (m_cell != nullptr) {
 		m_cell->removeOccupant(this);
 	}
 }
 
+
 void Creature::initRoll() {
 	m_init = abilityCheck(DEX);
 	LOG(m_name + " initiative roll: " + std::to_string(m_init));
 }
+
 
 bool Creature::checkHit(Attack* attack) {
 	if (m_dodge) attack->setDisadvantage(true);
@@ -162,6 +186,7 @@ bool Creature::checkHit(Attack* attack) {
 	LOG("Target " + m_name + " has AC " + std::to_string(m_AC));
 	return roll >= m_AC;
 }
+
 
 void Creature::takeDamage(Attack* attack) {
 	// reduce m_tempHP first
@@ -180,19 +205,36 @@ void Creature::takeDamage(Attack* attack) {
 	LOG(m_name + " is left with " + std::to_string(m_HP) + " hit points.");
 }
 
+
 void Creature::takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) {
 	LOG(m_name + " taking turn: ");
 	m_actions = m_reaction = 1;
-	m_movementRemaining = m_speed;
+	m_movementRemaining = (float)m_speed;
 	m_dodge = false;
+
+	for (Action* action : m_actionsAvailable)
+	{
+		action->resetActionState();
+	}
+
 	_resetFtreTrkrs();
+	_resetSpellTrkrs();
 	_setActionPriorities(friends, enemies);
 
+	std::vector<Action*> actionsToSkip = {};
+
 	while (m_actions > 0) {
-		for (auto& p : m_actionPriorities) {
-			Action* act = Action::tryAction(p, this);
-			if (act->isUsable(friends, enemies)) {
-				act->invoke(friends, enemies);
+		for (Action* action : m_actionsAvailable) {
+			if (std::find(actionsToSkip.begin(), actionsToSkip.end(), action) != actionsToSkip.end())
+			{
+				continue;
+			}
+
+			if ( action->isUsable(friends, enemies)) {
+				if (!action->invoke(friends, enemies))
+				{
+					actionsToSkip.push_back(action);
+				}
 				break;
 			}
 		}
@@ -200,6 +242,7 @@ void Creature::takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>&
 
 	_finishMove(friends, enemies);
 }
+
 
 // Choose a random adjacent target or nearest target otherwise
 Creature* Creature::chooseAttackTarget(const std::vector<Creature*>& enemies) {
@@ -229,15 +272,19 @@ Creature* Creature::chooseAttackTarget(const std::vector<Creature*>& enemies) {
 	return nullptr;
 }
 
-// later on this may be more context sensitive
+
+// later on we will use context to set weights but for now we just set them inline with the priority sorting
 void Creature::_setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
-	m_actionPriorities[0] = FEATURE_ACTION;
-	m_actionPriorities[1] = SPELL_ACTION;
-	m_actionPriorities[2] = ATTACK_ACTION;
-	m_actionPriorities[3] = DASH_ACTION;
-	m_actionPriorities[4] = DODGE_ACTION;
-	m_actionPriorities[5] = DISENGAGE_ACTION;
+	for (Action* a : m_actionsAvailable)
+	{
+		a->setPriorityWeight(m_archetype);
+	}
+
+	std::sort(m_actionsAvailable.begin(), m_actionsAvailable.end(), [](Action *a, Action* b) {
+		return a->getWeight() > b->getWeight();
+	});
 }
+
 
 int Creature::rolld20(ROLL_TYPE rollType) {
 	LOG(m_name + " rolls a d20.");
@@ -252,6 +299,7 @@ int Creature::rolld20(ROLL_TYPE rollType) {
 	}
 	return roll;
 }
+
 
 int Creature::rolld20Adv(ROLL_TYPE rollType) {
 	LOG(m_name + " rolls a d20 with advantage.");
@@ -270,6 +318,7 @@ int Creature::rolld20Adv(ROLL_TYPE rollType) {
 	return roll1 > roll2 ? roll1 : roll2;
 }
 
+
 int Creature::rolld20Dis(ROLL_TYPE rollType) {
 	LOG(m_name + " rolls a d20 with disadvantage.");
 	m_hadAdvantage = false;
@@ -287,6 +336,7 @@ int Creature::rolld20Dis(ROLL_TYPE rollType) {
 	return roll1 < roll2 ? roll1 : roll2;
 }
 
+
 int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
 	int roll;
 	if (((threat & C_FRIGHTENED) && (m_features & F_BRAVE)) ||
@@ -299,6 +349,7 @@ int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
 	return roll + m_abilityMods[sc] + m_savingThrowProfs[sc];
 }
 
+
 int Creature::abilityCheck(const std::vector<CHECK_TYPE>& abilities) {
 	int maxBonus = -std::numeric_limits<int>::max();
 	for (auto& a : abilities) {
@@ -308,9 +359,11 @@ int Creature::abilityCheck(const std::vector<CHECK_TYPE>& abilities) {
 	return rolld20(R_ABILITY_CHECK) + maxBonus;
 }
 
+
 int Creature::abilityCheck(ABILITY_SCORES sc) {
 	return rolld20(R_ABILITY_CHECK) + m_abilityMods[sc];
 }
+
 
 void Creature::_setupFtreTrkrs() {
 	for (FEATURE_BIT i = 1; i <= m_features; i <<= 1) {
@@ -321,16 +374,45 @@ void Creature::_setupFtreTrkrs() {
 			}
 			else {
 				m_ftreTrkrs.insert({ i, trkr });
+				if (isActionFeature(i))
+				{
+					ActionFeatureTrkr* actionTracker = dynamic_cast<ActionFeatureTrkr*>(trkr);
+					if (actionTracker == nullptr)
+					{
+						throw std::runtime_error("Action tracker not found for action feature");
+					}
+
+					m_actionsAvailable.push_back(new FeatureAction(i, this, actionTracker));
+				}
 			}
 		}
 	}
 }
+
 
 void Creature::_resetFtreTrkrs() {
 	for (auto f : m_ftreTrkrs) {
 		f.second->reset();
 	}
 }
+
+
+void Creature::_setupSpellTrkrs() {
+	for (SPELLS s : m_spellList) {
+		m_spellbook[s] = Spell::makeSpell(s, this);
+		if (isActionSpell(s)) {
+			m_actionsAvailable.push_back(new SpellAction(s, this, m_spellbook[s]));
+		}
+	}
+}
+
+
+void Creature::_resetSpellTrkrs() {
+	for (auto& s : m_spellbook) {
+		s.second->reset();
+	}
+}
+
 
 void Creature::_idCell() {
 	Ring& r = Ring::getInstance();
@@ -339,6 +421,7 @@ void Creature::_idCell() {
 		throw std::runtime_error("Couldn't identify a cell in the ring.");
 	}
 }
+
 
 std::vector<Creature*> Creature::getAdjCreatures() {
 	Ring& r = Ring::getInstance();
@@ -358,6 +441,7 @@ std::vector<Creature*> Creature::getAdjCreatures() {
 	return ret;
 }
 
+
 std::vector<Creature*> Creature::getAdjCreatures(const std::vector<Creature*>& candidates) {
 	std::vector<Creature*> ret = getAdjCreatures();
 	ret.erase(std::remove_if(ret.begin(), ret.end(), [&](const Creature* c) {
@@ -366,7 +450,8 @@ std::vector<Creature*> Creature::getAdjCreatures(const std::vector<Creature*>& c
 	return ret;
 }
 
-std::vector<Creature*> Creature::getCreaturesInRange(int range) {
+
+std::vector<Creature*> Creature::getCreaturesInRange(float range) {
 	Ring& r = Ring::getInstance();
 	std::vector<Creature*> ret;
 	for (auto c : r.cellsInRange(m_cell, range)) {
@@ -377,7 +462,8 @@ std::vector<Creature*> Creature::getCreaturesInRange(int range) {
 	return ret;
 }
 
-std::vector<Creature*> Creature::getCreaturesInRange(const std::vector<Creature*>& candidates, int range) {
+
+std::vector<Creature*> Creature::getCreaturesInRange(const std::vector<Creature*>& candidates, float range) {
 	std::vector<Creature*> ret = getCreaturesInRange(range);
 	ret.erase(std::remove_if(ret.begin(), ret.end(), [&](const Creature* c) {
 		return (std::find(candidates.begin(), candidates.end(), c) == candidates.end());
@@ -385,9 +471,11 @@ std::vector<Creature*> Creature::getCreaturesInRange(const std::vector<Creature*
 	return ret;
 }
 
-int Creature::getRemainingRange() {
+
+float Creature::getRemainingRange() {
 	return m_movementRemaining;
 }
+
 
 bool Creature::prepNextAttack(Attack* atk, Creature* target) {
 	atk->restore(); // specifically for foes, whose attacks may be changed but changes shouldn't persist
@@ -415,8 +503,9 @@ bool Creature::prepNextAttack(Attack* atk, Creature* target) {
 	return false;
 }
 
+
 bool Creature::_checkRangedAttack(Attack* atk, Creature* target) {
-	int distance = dist(m_cell, target->getCell());
+	float distance = dist(m_cell, target->getCell());
 	int min, max, dis;
 	atk->getMinMaxDisRange(min, max, dis);
 	if (distance < min) {
@@ -431,6 +520,7 @@ bool Creature::_checkRangedAttack(Attack* atk, Creature* target) {
 	}
 	return true;
 }
+
 
 bool Creature::moveToRangeOf(Creature* target, int range) {
 	if (dist(target->getCell(), m_cell) <= range) return true;
@@ -450,6 +540,7 @@ bool Creature::moveToRangeOf(Creature* target, int range) {
 	return dist(target->getCell(), m_cell) <= range;
 }
 
+
 bool Creature::moveToAdjacent(Creature* target) {
 	Ring& r = Ring::getInstance();
 	Cell* dest = nullptr;
@@ -467,12 +558,13 @@ bool Creature::moveToAdjacent(Creature* target) {
 	return (std::find(adj.begin(), adj.end(), m_cell) != adj.end());
 }
 
+
 bool Creature::moveToCell(Cell* dest) {
 	if (m_movementRemaining < 5) return false;
 	LOG(m_name + " attempts to move from cell (" + m_cell->coordString() + ") to cell (" + dest->coordString() + ")");
 	Ring& r = Ring::getInstance();
 	bool ret = true;
-	int distanceToTravel = dist(dest, m_cell);
+	float distanceToTravel = dist(dest, m_cell);
 	LOG(m_name + " has distance " + std::to_string(distanceToTravel) + " to travel and " + std::to_string(m_movementRemaining) + " movement remaining.");
 	if (distanceToTravel > m_movementRemaining) { // can't get all the way there
 		ret = false;
@@ -494,24 +586,32 @@ bool Creature::moveToCell(Cell* dest) {
 	return ret;
 }
 
+
 void Creature::dash() {
 	m_movementRemaining += m_speed;
 }
 
+
+void Creature::cancelDash() {
+	m_movementRemaining -= m_speed;
+}
+
+
 void Creature::_finishMove(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies) {
-	int distance;
+	float distance;
 	Creature* en = findNearest(enemies, distance);
 	if (en != nullptr) {
 		moveToRangeOf(en, m_speed / 2);
 	}
 }
 
-Creature* Creature::findNearest(const std::vector<Creature*> crtrs, int& distance) {
-	distance = std::numeric_limits<int>::max();
+
+Creature* Creature::findNearest(const std::vector<Creature*> crtrs, float& distance) {
+	distance = std::numeric_limits<float>::max();
 	Creature* ret = nullptr;
 	for (auto& c : crtrs) {
 		if (c->isStanding()) {
-			int thisDistance = dist(m_cell, c->getCell());
+			float thisDistance = dist(m_cell, c->getCell());
 			if (thisDistance < distance) {
 				distance = thisDistance;
 				ret = c;
@@ -521,6 +621,7 @@ Creature* Creature::findNearest(const std::vector<Creature*> crtrs, int& distanc
 	return ret;
 }
 
+
 static std::map<std::string, ABILITY_SCORES> lAblStrings {
 	{ "STR", STR },
 	{ "DEX", DEX },
@@ -529,6 +630,7 @@ static std::map<std::string, ABILITY_SCORES> lAblStrings {
 	{ "WIS", WIS },
 	{ "CHA", CHA },
 };
+
 
 static std::map<std::string, CHECK_TYPE> lCheckStrings {
 	{ "ACROBATICS", ACRO_CHK },
@@ -551,6 +653,7 @@ static std::map<std::string, CHECK_TYPE> lCheckStrings {
 	{ "SURVIVAL", SURV_CHK }
 };
 
+
 static std::map<CHECK_TYPE, ABILITY_SCORES> lCheckAbilities{
 	{ ACRO_CHK, DEX },
 	{ ANIM_CHK, WIS },
@@ -572,6 +675,7 @@ static std::map<CHECK_TYPE, ABILITY_SCORES> lCheckAbilities{
 	{ SURV_CHK, WIS }
 };
 
+
 bool checkProfsFromString(const std::string& token, CHECK_TYPE& val) {
 	auto i = lCheckStrings.find(token);
 	if (i != lCheckStrings.end()) {
@@ -580,6 +684,7 @@ bool checkProfsFromString(const std::string& token, CHECK_TYPE& val) {
 	}
 	return false;
 }
+
 
 bool saveProfsFromString(const std::string& token, ABILITY_SCORES& val) {
 	auto i = lAblStrings.find(token);
@@ -590,9 +695,11 @@ bool saveProfsFromString(const std::string& token, ABILITY_SCORES& val) {
 	return false;
 }
 
+
 ABILITY_SCORES checkAbility(CHECK_TYPE chk) {
 	return lCheckAbilities.at(chk);
 }
+
 
 FeatureTrkr* Creature::getTrkr(FEATURE_BIT ftre) {
 	FeatureTrkr* ret = m_ftreTrkrs.at(ftre);
@@ -602,11 +709,13 @@ FeatureTrkr* Creature::getTrkr(FEATURE_BIT ftre) {
 	return ret;
 }
 
+
 std::vector<Creature*> sortCreaturesBy(const std::vector<Creature*> list, std::function<bool(Creature*, Creature*)> pred) {
 	std::vector<Creature*> out = list;
 	std::sort(out.begin(), out.end(), pred);
 	return out;
 }
+
 
 std::vector<Creature*> sortCreaturesByLeastHealth(const std::vector<Creature*> list) {
 	return sortCreaturesBy(list, [](Creature* a, Creature* b) {
@@ -616,6 +725,7 @@ std::vector<Creature*> sortCreaturesByLeastHealth(const std::vector<Creature*> l
 		return ahp < bhp;
 	});
 }
+
 
 void Creature::healBy(int healing) {
 	m_HP += healing;

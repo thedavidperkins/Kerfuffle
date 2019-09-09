@@ -6,11 +6,18 @@
 
 class FeatureAction : public Action {
 public:
+	FeatureAction(FEATURE_BIT feature, Creature* user, ActionFeatureTrkr* tracker);
+
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
-	virtual void invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
-	FeatureAction(Creature* user);
+	virtual bool invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
+
+	// in the long run priority should be set by the spell tracker
+	virtual void setPriorityWeight(ARCHETYPE arch);
+
+	// No need to implement resetActionState for feature actions; this is handled by Creature::_resetFtreTrkrs()
 private:
-	ActionFeatureTrkr* m_toUse;
+	FEATURE_BIT m_feature;
+	ActionFeatureTrkr* m_featureTracker;
 };
 
 #endif//KERF_FEATURE_ACTION_H

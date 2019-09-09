@@ -8,7 +8,7 @@ class Creature;
 
 typedef __int64 FEATURE_BIT;
 
-#define FEATURE_DEF(className, bitName, bitVal) \
+#define FEATURE_DEF(className, bitName, bitVal, isAction) \
 const FEATURE_BIT F_##bitName = bitVal;
 
 #include "FeatureDefs.inl"
@@ -58,7 +58,7 @@ class ActionFeatureTrkr : public FeatureTrkr {
 public:
 	ActionFeatureTrkr(FEATURE_BIT ftre, Creature* owner) : FeatureTrkr(ftre, owner) {}
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) = 0;
-	virtual void invoke() = 0;
+	virtual bool invoke() = 0;
 	virtual void reset() = 0;
 };
 
@@ -94,7 +94,7 @@ class LayOnHandsTrkr : public ActionFeatureTrkr {
 public:
 	LayOnHandsTrkr(Creature* owner);
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
-	virtual void invoke();
+	virtual bool invoke();
 	virtual void reset() {}
 private:
 	int m_pool;
@@ -108,9 +108,11 @@ private:
 template <class T>
 inline FEATURE_BIT classBit() { return 0; }
 
-#define FEATURE_DEF(className, bitName, bitVal) \
+#define FEATURE_DEF(className, bitName, bitVal, isAction) \
 template <> inline FEATURE_BIT classBit<className##Trkr>() { return F_##bitName; }
 
 #include "FeatureDefs.inl"
+
+bool isActionFeature(FEATURE_BIT feature);
 
 #endif//KERF_FEATURES_H

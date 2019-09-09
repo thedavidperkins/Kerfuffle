@@ -176,7 +176,7 @@ bool atkActionUsable(Creature* user, const std::vector<Creature*>& friends, cons
 		}
 	}
 
-	int range = user->getRemainingRange(); // movement range
+	float range = user->getRemainingRange(); // movement range
 	int atkRange = user->getMaxAtkRange(); // attack range
 
 										   // Next check for ranged attack

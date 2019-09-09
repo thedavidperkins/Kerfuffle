@@ -40,7 +40,7 @@ void Ring::reset() {
 
 static std::string shortName(const std::string& name) {
 	std::string ret = name;
-	ret.resize(8);
+	ret.resize(8, ' ');
 	return ret;
 }
 
@@ -126,8 +126,8 @@ std::vector<Cell*> Ring::sortCellsBy(std::function<bool(const Cell*, const Cell*
 
 std::vector<Cell*> Ring::sortCellsByDistance(Cell* c) {
 	return sortCellsBy([&](const Cell* a, const Cell* b) {
-		int da = dist(a, c);
-		int db = dist(b, c);
+		float da = dist(a, c);
+		float db = dist(b, c);
 		if (da == db) {
 			return dist(a, RING_SIZE / 2, RING_SIZE / 2) < dist(b, RING_SIZE / 2, RING_SIZE / 2);
 		}
@@ -135,7 +135,7 @@ std::vector<Cell*> Ring::sortCellsByDistance(Cell* c) {
 	});
 }
 
-std::vector<Cell*> Ring::cellsInRange(Cell* c, int range) {
+std::vector<Cell*> Ring::cellsInRange(Cell* c, float range) {
 	std::vector<Cell*> ret;
 	for (int i = 0; i < RING_SIZE; ++i) {
 		bool foundInRow = false;
@@ -156,16 +156,21 @@ std::vector<Cell*> Ring::cellsInRange(Cell* c, int range) {
 	return ret;
 }
 
-int dist(int x1, int y1, int x2, int y2) {
-	int xd2 = (x2 - x1) * (x2 - x1);
-	int yd2 = (y2 - y1) * (y2 - y1);
-	return (int)(5 * (sqrt((double)xd2 + (double)yd2)));
+float dist(int x1, int y1, int x2, int y2) {
+	float x1f = static_cast<float>(x1);
+	float x2f = static_cast<float>(x2);
+	float y1f = static_cast<float>(y1);
+	float y2f = static_cast<float>(y2);
+
+	float xd2 = (x2f - x1f) * (x2f - x1f);
+	float yd2 = (y2f - y1f) * (y2f - y1f);
+	return (5 * (sqrt(xd2 + yd2)));
 }
 
-int dist(const Cell* a, int x, int y) {
+float dist(const Cell* a, int x, int y) {
 	return dist(a->x(), a->y(), x, y);
 }
 
-int dist(const Cell* a, const Cell* b) {
+float dist(const Cell* a, const Cell* b) {
 	return dist(a->x(), a->y(), b->x(), b->y());
 }

@@ -1,3 +1,4 @@
+#include "Attack.h"
 #include "Foe.h"
 #include "Ring.h"
 
@@ -131,9 +132,23 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 		}
 		else if (token == "SPELLS") {
 			std::getline(defStream, line);
-			if (line.find("ENDSPELLS") != 0) {
-				errStatus = "Error: spell initialization not yet implemented.";
-				return false;
+			while (line.find("ENDSPELLS") != 0) {
+				if (!defStream) {
+					errStatus = "Error: met premature end of definition stream. (Spell list)";
+					return false;
+				}
+				SPELLS spellType = S_INVALID_SPELL;
+				procLine.clear();
+				procLine.str(line);
+				procLine >> token;
+				if (!splFrmStr(token, spellType) || spellType == S_INVALID_SPELL || spellType >= N_SPELLS)
+				{
+					errStatus = "Error: unrecognized spell token: " + token;
+					return false;
+				}
+				m_spellList.push_back(spellType);
+
+				std::getline(defStream, line);
 			}
 		}
 		else if (token == "ATK") {

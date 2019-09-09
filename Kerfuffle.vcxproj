@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Action.h" />
+    <ClInclude Include="include\Archetypes.h" />
     <ClInclude Include="include\Attack.h" />
     <ClInclude Include="include\AttackAction.h" />
     <ClInclude Include="include\BonusAction.h" />

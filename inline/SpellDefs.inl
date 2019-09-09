@@ -1,15 +1,15 @@
 #ifndef SPELL_DEF
-#define SPELL_DEF(className, spellName)
+#define SPELL_DEF(className, spellName, isAction)
 #endif
 
-SPELL_DEF(AcidSplash, ACID_SPLASH)
-SPELL_DEF(FireBolt, FIRE_BOLT)
-SPELL_DEF(RayOfFrost, RAY_OF_FROST)
-SPELL_DEF(ShockingGrasp, SHOCKING_GRASP)
-SPELL_DEF(BurningHands, BURNING_HANDS)
-SPELL_DEF(MageArmor, MAGE_ARMOR)
-SPELL_DEF(MagicMissile, MAGIC_MISSILE)
-SPELL_DEF(Shield, SHIELD)
-SPELL_DEF(Thunderwave, THUNDERWAVE)
+SPELL_DEF(AcidSplash, ACID_SPLASH, true)
+SPELL_DEF(FireBolt, FIRE_BOLT, true)
+SPELL_DEF(RayOfFrost, RAY_OF_FROST, true)
+SPELL_DEF(ShockingGrasp, SHOCKING_GRASP, true)
+SPELL_DEF(BurningHands, BURNING_HANDS, true)
+SPELL_DEF(MageArmor, MAGE_ARMOR, true)
+SPELL_DEF(MagicMissile, MAGIC_MISSILE, true)
+SPELL_DEF(Shield, SHIELD, false)
+SPELL_DEF(Thunderwave, THUNDERWAVE, true)
 
 #undef SPELL_DEF

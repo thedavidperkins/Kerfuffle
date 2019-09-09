@@ -2,16 +2,23 @@
 #define KERF_SPELL_ACTION_H
 
 #include "Action.h"
+#include "Spell.h"
 
-class Spell;
 
 class SpellAction : public Action {
 public:
+	SpellAction(SPELLS spell, Creature* user, Spell* spellTracker);
+
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
-	virtual void invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
-	SpellAction(Creature* user);
+	virtual bool invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
+
+	// in the long run priority should be set by the spell tracker
+	virtual void setPriorityWeight(ARCHETYPE arch);
+
+	// No need to implement resetActionState for spell actions; this is handled by Creature::_resetSpells()
 private:
-	Spell* m_queuedSpell;
+	SPELLS m_spellType;
+	Spell* m_spell;
 };
 
 #endif//KERF_SPELL_ACTION_H

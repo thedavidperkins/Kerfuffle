@@ -158,6 +158,7 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 			DMG_TYPE type = BLUDGEONING;
 			WEAPON_PROPS props = 0;
 			int minRange = 0, maxRange = 5, disRange = 5;
+			std::vector<AttackEffect> attackEffects;
 			while (line.find("ENDATK") != 0) {
 				std::getline(defStream, line);
 				if (!defStream) {
@@ -197,9 +198,32 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 						if (propFromString(token, bit)) props |= bit;
 					}
 				}
+				else if (token == "EFFECT") {
+					procLine >> token;
+					ATTACK_EFFECT_TYPE type;
+					if (!atkEffectFromString(token, type)) {
+						errStatus = "Unrecognized attack effect: " + token;
+						return false;
+					}
+					int dc;
+					procLine >> dc;
+					if (dc < 0 || dc > 30)
+					{
+						errStatus = "Invalid attack save dc: " + std::to_string(dc);
+						return false;
+					}
+					procLine >> token;
+					ABILITY_SCORES saveType;
+					if (!saveProfsFromString(token, saveType))
+					{
+						errStatus = "Invalid attack save ability score: " + token;
+						return false;
+					}
+					attackEffects.push_back({ type, dc, saveType });
+				}
 				else if (token == "ENDATK") {
 					Attack* atk = new Attack(this);
-					atk->load(type, atkBonus, dmgString, -1, props, minRange, maxRange, disRange);
+					atk->load(type, atkBonus, dmgString, -1, props, minRange, maxRange, disRange, attackEffects);
 					m_attacks.push_back(atk);
 				}
 			}

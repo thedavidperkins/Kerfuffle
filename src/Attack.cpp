@@ -4,24 +4,32 @@
 #include "Logger.h"
 #include "Loadout.h"
 
-Attack::Attack(Creature* agent) :
-	m_agent(agent),
-	m_atkBonus(0),
-	m_dmgDice(d0),
-	m_singleDie(d0),
-	m_dmgBonus(0),
-	m_dmgString(),
-	m_type(BLUDGEONING),
-	m_props(0),
-	m_curProps(0),
-	m_loaded(false),
-	m_advantage(false),
-	m_disadvantage(false),
-	m_crit(false), 
-	m_maxRange(5),
-	m_minRange(0),
-	m_disRange(5)
+
+static std::string lAttackEffectNames[N_ATTACK_EFFECT_TYPES] = {
+	"POISONING",
+};
+
+
+Attack::Attack(Creature* agent)
+	: m_agent(agent)
+	, m_atkBonus(0)
+	, m_dmgDice(d0)
+	, m_singleDie(d0)
+	, m_dmgBonus(0)
+	, m_dmgString()
+	, m_type(BLUDGEONING)
+	, m_props(0)
+	, m_curProps(0)
+	, m_loaded(false)
+	, m_advantage(false)
+	, m_disadvantage(false)
+	, m_crit(false) 
+	, m_maxRange(5)
+	, m_minRange(0)
+	, m_disRange(5)
+	, m_attackEffects()
 {}
+
 
 void Attack::load(Loadout* loadout, bool dual) {
 	m_props = loadout->getProps(dual);
@@ -37,12 +45,14 @@ void Attack::load(Loadout* loadout, bool dual) {
 	wepMinMaxDisRange(loadout->getWepType(), m_minRange, m_maxRange, m_disRange);
 }
 
+
 void Attack::load(DMG_TYPE type, int atkBonus, const std::string& dmgString,
 	int dmgBonus,
 	WEAPON_PROPS props,
 	int minRange,
 	int maxRange,
-	int disRange
+	int disRange,
+	const std::vector<AttackEffect>& effects
 ) 
 {
 	m_props = props;
@@ -58,7 +68,10 @@ void Attack::load(DMG_TYPE type, int atkBonus, const std::string& dmgString,
 	m_minRange = minRange;
 	m_maxRange = maxRange;
 	m_disRange = disRange;
+
+	m_attackEffects = effects;
 }
+
 
 void Attack::load(const Attack& rhs) {
 	m_props = rhs.m_props;
@@ -73,7 +86,9 @@ void Attack::load(const Attack& rhs) {
 	m_minRange = rhs.m_minRange;
 	m_maxRange = rhs.m_maxRange;
 	m_disRange = rhs.m_disRange;
+	m_attackEffects = rhs.m_attackEffects;
 }
+
 
 void Attack::unload() {
 	m_atkBonus = 0;
@@ -88,6 +103,7 @@ void Attack::unload() {
 	m_maxRange = 0;
 	m_disRange = 0;
 }
+
 
 int Attack::atk() {
 	int ret;
@@ -117,6 +133,7 @@ int Attack::atk() {
 	return ret;
 }
 
+
 int Attack::dmg(Creature* target) {
 
 	int ret = m_dmgDice();
@@ -142,22 +159,40 @@ int Attack::dmg(Creature* target) {
 		}
 	}
 
+	// Apply attack hit effects
+	for (const AttackEffect& effect : m_attackEffects) {
+		if (effect.type == A_POISONING && !(target->getCondition() & C_POISONED)) {
+			LOG(target->getName() + " makes a " + abilToString(effect.saveType) + " saving throw against effect poisoning dc " + std::to_string(effect.dc));
+			if (target->savingThrow(effect.saveType, C_POISONED) < effect.dc) {
+				LOG(target->getName() + " failed the saving throw and is now poisoned!");
+				target->addCondition(C_POISONED);
+			}
+			else {
+				LOG(target->getName() + " succeeded and is not poisoned!");
+			}
+		}
+	}
+
 	return ret + m_dmgBonus;
 }
+
 
 DMG_TYPE Attack::dmgType() {
 	return m_type;
 }
 
+
 std::string Attack::getUser() const { 
 	return m_agent->getName();
 }
+
 
 void Attack::getMinMaxDisRange(int& min, int& max, int& dis) {
 	min = m_minRange;
 	max = m_maxRange;
 	dis = m_disRange;
 }
+
 
 bool atkActionUsable(Creature* user, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies, bool dual) {
 	// check all adjacent enemies
@@ -220,5 +255,21 @@ bool atkActionUsable(Creature* user, const std::vector<Creature*>& friends, cons
 		}
 	}
 
+	return false;
+}
+
+
+bool atkEffectFromString(const std::string& effectName, ATTACK_EFFECT_TYPE& effect)
+{
+	for (uint32_t effectIter = 0; effectIter < N_ATTACK_EFFECT_TYPES; ++effectIter)
+	{
+		if (effectName == lAttackEffectNames[effectIter])
+		{
+			effect = static_cast<ATTACK_EFFECT_TYPE>(effectIter);
+			return true;
+		}
+	}
+
+	effect = N_ATTACK_EFFECT_TYPES;
 	return false;
 }

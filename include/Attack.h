@@ -7,6 +7,22 @@ class Loadout;
 
 #include "Action.h"
 #include "Weapons.h"
+#include "Creature.h"
+
+
+enum ATTACK_EFFECT_TYPE
+{
+	A_POISONING = 0,
+	N_ATTACK_EFFECT_TYPES
+};
+
+
+struct AttackEffect {
+	ATTACK_EFFECT_TYPE type;
+	int dc;
+	ABILITY_SCORES saveType;
+};
+
 
 class Attack {
 public:
@@ -17,7 +33,8 @@ public:
 		WEAPON_PROPS props = 0,
 		int minRange = 0,
 		int maxRange = 5,
-		int disRange = 5
+		int disRange = 5,
+		const std::vector<AttackEffect>& effects = {}
 	);
 	void load(const Attack& rhs);
 	void unload();
@@ -53,8 +70,12 @@ private:
 	int m_maxRange;
 	int m_minRange;
 	int m_disRange;
+
+	std::vector<AttackEffect> m_attackEffects;
 };
 
 bool atkActionUsable(Creature* user, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies, bool dual = false);
+bool atkEffectFromString(const std::string& effectName, ATTACK_EFFECT_TYPE& effect);
+
 
 #endif//KERF_ATTACK_H

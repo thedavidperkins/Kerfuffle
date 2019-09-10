@@ -1,3 +1,5 @@
-resources\sample.txt
+resources\squirmyworm.txt
+resources\squirmyworm.txt
+resources\squirmyworm.txt
 resources\caedrak.txt
 resources\milo.txt

@@ -36,6 +36,17 @@ bool Encounter::_defineFromFile(const std::string& defFile) {
 	return true;
 }
 
+
+static bool foeListContainsName(const std::string& name, const std::vector<Creature*>& foes) {
+	for (const Creature* foe : foes) {
+		if (foe->getName() == name) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 bool Encounter::_procFile(const std::string& fileName) {
 	std::ifstream file(fileName);
 	std::string line;
@@ -63,6 +74,10 @@ bool Encounter::_procFile(const std::string& fileName) {
 				out << line << std::endl;
 			}
 			Foe* foe = new Foe(out);
+			while (foeListContainsName(foe->getName(), m_foesInitial)) {
+				foe->bumpName();
+			}
+
 			m_foesInitial.push_back(foe);
 			out.clear(); out.str(std::string());
 		}

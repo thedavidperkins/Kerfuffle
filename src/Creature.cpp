@@ -247,6 +247,20 @@ void Creature::takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>&
 }
 
 
+void Creature::bumpName() {
+	while (m_name.length() < 8) {
+		m_name.append(" ");
+	}
+
+	if (m_name[7] == ' ') {
+		m_name[7] = '1';
+	}
+	else {
+		m_name[7] = m_name[7] + 1;
+	}
+}
+
+
 // Choose a random adjacent target or nearest target otherwise
 Creature* Creature::chooseAttackTarget(const std::vector<Creature*>& enemies) {
 	// get adjacent enemy list
@@ -352,7 +366,9 @@ int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
 	else {
 		roll = rolld20(R_SAVING_THROW);
 	}
-	return roll + m_abilityMods[sc] + m_savingThrowProfs[sc];
+	uint32_t fullRoll = roll + m_abilityMods[sc] + m_savingThrowProfs[sc];
+	LOG(m_name + " rolled a saving throw of " + std::to_string(fullRoll));
+	return fullRoll;
 }
 
 
@@ -715,6 +731,17 @@ bool saveProfsFromString(const std::string& token, ABILITY_SCORES& val) {
 }
 
 
+std::string abilToString(ABILITY_SCORES score)
+{
+	for (auto& item : lAblStrings) {
+		if (item.second == score) {
+			return item.first;
+		}
+	}
+	return "UNKNOWN_ABILITY";
+}
+
+
 ABILITY_SCORES checkAbility(CHECK_TYPE chk) {
 	return lCheckAbilities.at(chk);
 }
@@ -749,4 +776,7 @@ std::vector<Creature*> sortCreaturesByLeastHealth(const std::vector<Creature*> l
 void Creature::healBy(int healing) {
 	m_HP += healing;
 	if (m_HP > m_maxHP) m_HP = m_maxHP;
+	if (!m_alive && m_HP > 0) {
+		m_alive = true;
+	}
 }

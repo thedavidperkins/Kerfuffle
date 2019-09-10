@@ -88,9 +88,11 @@ public:
 	int getMaxHP() const { return m_maxHP; }
 	int getHealthLost() const { return m_maxHP - m_HP; }
 	CONDITION getCondition() const { return m_condition; }
+	void addCondition(CONDITION_BITS condition) { m_condition |= condition; }
 	void healBy(int healing);
 
 	std::string getName() const { return m_name; }
+	void bumpName();
 
 	Creature* chooseAttackTarget(const std::vector<Creature*>& enemies);
 
@@ -223,6 +225,7 @@ protected:
 
 bool checkProfsFromString(const std::string& token, CHECK_TYPE& val);
 bool saveProfsFromString(const std::string& token, ABILITY_SCORES& val);
+std::string abilToString(ABILITY_SCORES score);
 ABILITY_SCORES checkAbility(CHECK_TYPE chk);
 
 std::vector<Creature*> sortCreaturesBy(const std::vector<Creature*> list, std::function<bool(Creature*, Creature*)> pred);

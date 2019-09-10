@@ -10,6 +10,9 @@
 #include "SpellAction.h"
 
 
+constexpr uint32_t DEFAULT_SPEED = 25;
+
+
 Creature::Creature()
 	: m_name()
 	, m_abilityMods{ 0, 0, 0, 0, 0, 0 }
@@ -45,7 +48,7 @@ Creature::Creature()
 	, m_x(0)
 	, m_y(0)
 	, m_cell(nullptr)
-	, m_speed(25)
+	, m_speed(DEFAULT_SPEED)
 	, m_movementRemaining((float)m_speed)
 {
 	_loadDefaultActions();

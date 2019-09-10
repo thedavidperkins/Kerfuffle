@@ -91,6 +91,10 @@ void Attack::unload() {
 
 int Attack::atk() {
 	int ret;
+	if (m_agent->getCondition() & C_POISONED)
+	{
+		m_disadvantage = true;
+	}
 	if (m_advantage && !m_disadvantage) {
 		ret = m_agent->rolld20Adv(R_ATTACK_ROLL);
 	}

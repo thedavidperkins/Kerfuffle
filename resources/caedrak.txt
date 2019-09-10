@@ -1,0 +1,69 @@
+#player name and level
+PLAYER Caedrak 1
+
+#archetype
+ARCH BRAWLER
+
+#str dex con ntl wis cha
+ATTR 1 0 2 -1 0 1
+
+#ac spell_dc
+ACDC 18 11
+
+#maxHP
+HP 12
+
+#prof_bonus
+PROFBONUS 2
+
+#save proficiencies
+SAVEPROFS
+	WIS
+	CHA
+ENDSAVEPROFS
+
+#ability proficiencies
+ABILITYPROFS
+	INSIGHT
+	MEDICINE
+	RELIGION
+	SURVIVAL
+ENDABILITYPROFS
+
+#spell_slots
+SLOTS 0 0 0 0 0 0 0 0 0
+
+#spellbook
+SPELLS
+
+ENDSPELLS
+
+#loadout
+LOADOUT
+WEAPONS
+	FLAIL
+	LIGHT_HAMMER
+	LIGHT_HAMMER
+	LIGHT_HAMMER
+	LIGHT_HAMMER
+ENDWEAPONS
+
+#weapon proficiencies
+WPROF
+ENDWPROF
+
+#weapon property proficiencies
+PPROF
+	SIMPLE
+	MARTIAL
+ENDPPROF
+
+ENDLOADOUT
+
+#features
+FEATURES
+	LAY_ON_HANDS
+	DWARVEN_RESILIENCE
+ENDFEATURES
+
+ENDPLAYER

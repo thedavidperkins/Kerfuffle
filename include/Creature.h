@@ -49,7 +49,8 @@ enum CHECK_TYPE {
 
 enum CONDITION_BITS {
 	C_FRIGHTENED = 0x1,
-	C_CHARMED = 0x2
+	C_CHARMED = 0x2,
+	C_POISONED = 0x4,
 };
 typedef unsigned int CONDITION;
 
@@ -86,6 +87,7 @@ public:
 	int getHPTP() const { return m_HP + m_tempHP; }
 	int getMaxHP() const { return m_maxHP; }
 	int getHealthLost() const { return m_maxHP - m_HP; }
+	CONDITION getCondition() const { return m_condition; }
 	void healBy(int healing);
 
 	std::string getName() const { return m_name; }

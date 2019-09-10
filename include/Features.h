@@ -51,6 +51,7 @@ EMPTY_TRKR(LuckyTrkr, F_LUCKY);
 EMPTY_TRKR(BraveTrkr, F_BRAVE);
 EMPTY_TRKR(SavageAttacksTrkr, F_SAVAGE_ATTACKS);
 EMPTY_TRKR(FeyAncestryTrkr, F_FEY_ANCESTRY);
+EMPTY_TRKR(DwarvenResilienceTrkr, F_DWARVEN_RESILIENCE);
 
 //=================================================================================
 

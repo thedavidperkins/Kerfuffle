@@ -339,8 +339,11 @@ int Creature::rolld20Dis(ROLL_TYPE rollType) {
 
 int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
 	int roll;
-	if (((threat & C_FRIGHTENED) && (m_features & F_BRAVE)) ||
-		((threat & C_CHARMED) && (m_features & F_FEY_ANCESTRY))) {
+	if (
+		((threat & C_FRIGHTENED)    &&     (m_features & F_BRAVE))                ||
+		((threat & C_CHARMED)       &&     (m_features & F_FEY_ANCESTRY))         ||
+		((threat & C_POISONED)      &&     (m_features & F_DWARVEN_RESILIENCE))
+		) {
 		roll = rolld20Adv(R_SAVING_THROW);
 	}
 	else {
@@ -352,16 +355,29 @@ int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
 
 int Creature::abilityCheck(const std::vector<CHECK_TYPE>& abilities) {
 	int maxBonus = -std::numeric_limits<int>::max();
+	ABILITY_SCORES ability = N_ABILITY_SCORES;
 	for (auto& a : abilities) {
 		int bonus = m_abilityMods[checkAbility(a)] + m_chkProfs[a];
-		if (maxBonus < bonus) maxBonus = bonus;
+		if (maxBonus < bonus)
+		{
+			maxBonus = bonus;
+			ability = checkAbility(a);
+		}
 	}
-	return rolld20(R_ABILITY_CHECK) + maxBonus;
+
+	return abilityCheck(ability);
 }
 
 
 int Creature::abilityCheck(ABILITY_SCORES sc) {
-	return rolld20(R_ABILITY_CHECK) + m_abilityMods[sc];
+	if (m_condition & C_POISONED)
+	{
+		return rolld20Dis(R_ABILITY_CHECK) + m_abilityMods[sc];
+	}
+	else
+	{
+		return rolld20(R_ABILITY_CHECK) + m_abilityMods[sc];
+	}
 }
 
 

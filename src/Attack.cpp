@@ -136,16 +136,16 @@ int Attack::atk() {
 
 int Attack::dmg(Creature* target) {
 
-	int ret = m_dmgDice();
-	LOG(m_agent->getName() + " rolls the dice in " + m_dmgString + " and gets " + std::to_string(ret));
+	int baseAttack = m_dmgDice();
+	LOG(m_agent->getName() + " rolls the dice in " + m_dmgString + " and gets " + std::to_string(baseAttack));
 	if (m_crit) {
 		int toAdd = m_dmgDice();
 		LOG(m_agent->getName() + " rolls the dice again for critting and gets " + std::to_string(toAdd));
-		ret += toAdd;
+		baseAttack += toAdd;
 		if (m_agent->getFeatures() & F_SAVAGE_ATTACKS) {
 			toAdd = m_singleDie();
 			LOG(m_agent->getName() + " rolls one more die for Savage Attacks and gets " + std::to_string(toAdd));
-			ret += toAdd;
+			baseAttack += toAdd;
 		}
 		m_crit = false;
 	}
@@ -155,7 +155,7 @@ int Attack::dmg(Creature* target) {
 	if (m_agent->getFeatures() & F_SNEAK_ATTACK) {
 		auto sat = m_agent->getTrkr<SneakAttackTrkr>();
 		if (sat->isUsable(target, *m_agent->getFriends())) {
-			ret += sat->use();
+			baseAttack += sat->use();
 		}
 	}
 
@@ -173,7 +173,15 @@ int Attack::dmg(Creature* target) {
 		}
 	}
 
-	return ret + m_dmgBonus;
+	int totalAttack = baseAttack + m_dmgBonus;
+
+	// Check for resistance-- for now only support a single type of dmg per attack
+	if (target->hasDmgResistance(m_type)) {
+		LOG(target->getName() + " has resistance to " + dmgTypeToString(m_type) + " and only takes half damage.");
+		totalAttack /= 2;
+	}
+
+	return totalAttack;
 }
 
 

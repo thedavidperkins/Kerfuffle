@@ -138,6 +138,9 @@ public:
 
 	void setFriends(std::vector<Creature*>* friends) { m_friends = friends; }
 	std::vector<Creature*>* getFriends() { return m_friends; }
+
+	bool hasDmgResistance(DMG_TYPE dmgType);
+
 protected:
 	Creature();
 	Creature(const Creature* rhs);

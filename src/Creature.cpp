@@ -780,3 +780,15 @@ void Creature::healBy(int healing) {
 		m_alive = true;
 	}
 }
+
+
+bool Creature::hasDmgResistance(DMG_TYPE dmgType) {
+	switch (dmgType)
+	{
+	case POISON:
+		return ( m_features & F_DWARVEN_RESILIENCE );
+		break;
+	default:
+		return false;
+	}
+}

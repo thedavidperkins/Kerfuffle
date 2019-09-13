@@ -6,13 +6,19 @@
 #include "Player.h"
 #include "Ring.h"
 
+
+static constexpr int TURNS_PER_MINUTE = 10;
+
+
 #define FEATURE_DEF(className, bitName, bitVal, isAction) \
 { #bitName, F_##bitName },
+
 
 static std::map<std::string, FEATURE_BIT> lFeatureNames{
 #include "FeatureDefs.inl"
 	{ "Invalid", 0 }
 };
+
 
 bool ftrFrmStr(const std::string& str, FEATURE_BIT& bit) {
 	auto i = lFeatureNames.find(str);
@@ -20,6 +26,7 @@ bool ftrFrmStr(const std::string& str, FEATURE_BIT& bit) {
 	bit = i->second;
 	return true;
 }
+
 
 FeatureTrkr* FeatureTrkr::makeTracker(FEATURE_BIT type, Creature* owner) {
 	switch (type)
@@ -30,6 +37,8 @@ FeatureTrkr* FeatureTrkr::makeTracker(FEATURE_BIT type, Creature* owner) {
 		return new RelentlessEnduranceTrkr(owner);
 	case F_SNEAK_ATTACK:
 		return new SneakAttackTrkr(owner);
+	case F_BARBARIAN_RAGE:
+		return new BarbarianRageTrkr(owner);
 	case F_LUCKY:
 	case F_BRAVE:
 	case F_SAVAGE_ATTACKS:
@@ -39,7 +48,9 @@ FeatureTrkr* FeatureTrkr::makeTracker(FEATURE_BIT type, Creature* owner) {
 	}
 }
 
+
 //===========================================================================
+
 
 bool SneakAttackTrkr::_targetDistracted(Creature* target, const std::vector<Creature*>& friends) {
 	for (auto& c : target->getAdjCreatures(friends)) {
@@ -50,9 +61,11 @@ bool SneakAttackTrkr::_targetDistracted(Creature* target, const std::vector<Crea
 	return false;
 }
 
+
 bool SneakAttackTrkr::isUsable(Creature* target, const std::vector<Creature*>& friends) {
 	return (!m_used) && (m_owner->hadAdvantage() || (!m_owner->hadDisadvantage() && _targetDistracted(target, friends)));
 }
+
 
 int SneakAttackTrkr::use() {
 	m_used = true;
@@ -65,13 +78,16 @@ int SneakAttackTrkr::use() {
 	return snkBonus;
 }
 
+
 //===========================================================================
 
-LayOnHandsTrkr::LayOnHandsTrkr(Creature* owner) : 
-	ActionFeatureTrkr(F_LAY_ON_HANDS, owner),
-	m_pool(5 * dynamic_cast<Player*>(owner)->getLvl()),
-	m_target(nullptr)
+
+LayOnHandsTrkr::LayOnHandsTrkr(Creature* owner)
+	: ActionFeatureTrkr(F_LAY_ON_HANDS, owner)
+	, m_pool(5 * dynamic_cast<Player*>(owner)->getLvl())
+	, m_target(nullptr)
 {}
+
 
 bool LayOnHandsTrkr::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
 	if (m_pool < 2) return false; // don't waste your time on 2 hp or less of healing available
@@ -104,6 +120,7 @@ bool LayOnHandsTrkr::isUsable(const std::vector<Creature*>& friends, const std::
 	return false;
 }
 
+
 bool LayOnHandsTrkr::invoke() {
 	if (m_target != m_owner) {
 		if (m_owner->getAdjCreatures({ m_target }).empty()) {
@@ -127,6 +144,80 @@ bool LayOnHandsTrkr::invoke() {
 	m_target = nullptr;
 	return true;
 }
+
+
+//===========================================================================
+
+
+static int getRagesForBarbarianLevel(int level)
+{
+	if (level < 3) {
+		return 2;
+	}
+	else if (level < 6) {
+		return 3;
+	}
+	else if (level < 12) {
+		return 4;
+	}
+	else if (level < 17) {
+		return 5;
+	}
+	else if (level < 20) {
+		return 6;
+	}
+
+	return std::numeric_limits<int>::max();
+}
+
+
+BarbarianRageTrkr::BarbarianRageTrkr(Creature* owner)
+	: FeatureTrkr(F_BARBARIAN_RAGE, owner)
+	, m_turnsActive(-1)
+	, m_usesRemaining(getRagesForBarbarianLevel(dynamic_cast<Player *>(owner)->getLvl()))
+{}
+
+
+bool BarbarianRageTrkr::isUsable(const std::vector<Creature*>&, const std::vector<Creature*>& enemies) {
+	if (isActive() || m_usesRemaining < 1) {
+		return false;
+	}
+
+	// Don't rage if you can't get a hit this turn
+	return !m_owner->getCreaturesInRange(enemies, static_cast<float>(m_owner->getSpeed())).empty();
+}
+
+
+bool BarbarianRageTrkr::invoke() {
+	m_turnsActive = 0;
+	--m_usesRemaining;
+	return true;
+}
+
+
+void BarbarianRageTrkr::reset() {
+	if (
+		(++m_turnsActive > TURNS_PER_MINUTE) ||
+		(!m_owner->atkdThisTurn() && !m_owner->tookDmgThisTurn())
+	) {
+		cancelRage();
+	}
+}
+
+
+int BarbarianRageTrkr::getDmgBonus() {
+	int level = dynamic_cast<Player *>(m_owner)->getLvl();
+	if (level < 9) {
+		return 2;
+	}
+	if (level < 16) {
+		return 3;
+	}
+	return 4;
+}
+
+
+//===========================================================================
 
 
 #define FEATURE_DEF(className, bitName, bitVal, isAction)			\

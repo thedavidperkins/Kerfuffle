@@ -10,5 +10,6 @@ FEATURE_DEF(SavageAttacks, SAVAGE_ATTACKS, 0x10, false)
 FEATURE_DEF(LayOnHands, LAY_ON_HANDS, 0x20, true)
 FEATURE_DEF(FeyAncestry, FEY_ANCESTRY, 0x40, false)
 FEATURE_DEF(DwarvenResilience, DWARVEN_RESILIENCE, 0x80, false)
+FEATURE_DEF(BarbarianRage, BARBARIAN_RAGE, 0x100, false)
 
 #undef FEATURE_DEF

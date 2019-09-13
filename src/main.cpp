@@ -8,7 +8,7 @@
 #include "Ring.h"
 
 int main() {
-	try {
+	/*try*/ {
 		Encounter e("resources\\defFiles.txt");
 		int wincount = 0;
 		int total = 100;
@@ -20,7 +20,7 @@ int main() {
 		}
 		std::cout << "Win percentage: " << (double)wincount / (double)total << std::endl;
 	}
-	catch (std::exception& ex) {
+	/*catch (std::exception& ex) {
 		std::cout << ex.what() << std::endl;
-	}
+	}*/
 }

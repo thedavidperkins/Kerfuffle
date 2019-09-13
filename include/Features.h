@@ -103,6 +103,23 @@ private:
 };
 
 //=================================================================================
+
+class BarbarianRageTrkr : public FeatureTrkr {
+public:
+	BarbarianRageTrkr(Creature* owner);
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	virtual bool invoke();
+	virtual void reset();
+
+	int getDmgBonus();
+	bool isActive() { return m_turnsActive > 0; }
+	void cancelRage() { m_turnsActive = -1; }
+private:
+	int m_turnsActive;
+	int m_usesRemaining;
+};
+
+//=================================================================================
 //=================================================================================
 //=================================================================================
 

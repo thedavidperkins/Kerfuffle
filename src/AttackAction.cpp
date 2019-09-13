@@ -46,9 +46,11 @@ bool AttackAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*
 	}
 	m_user->cleanupAttackList(atks);
 
-	if (!attacked)
-	{
+	if (!attacked) {
 		LOG(m_user->getName() + " wasn't able to attack.");
+	}
+	else {
+		m_user->setAtkdThisTurn();
 	}
 	return attacked;
 }

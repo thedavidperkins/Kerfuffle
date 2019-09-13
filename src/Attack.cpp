@@ -135,6 +135,7 @@ int Attack::atk() {
 
 
 int Attack::dmg(Creature* target) {
+	target->setTookDmgThisTurn();
 
 	int baseAttack = m_dmgDice();
 	LOG(m_agent->getName() + " rolls the dice in " + m_dmgString + " and gets " + std::to_string(baseAttack));
@@ -156,6 +157,16 @@ int Attack::dmg(Creature* target) {
 		auto sat = m_agent->getTrkr<SneakAttackTrkr>();
 		if (sat->isUsable(target, *m_agent->getFriends())) {
 			baseAttack += sat->use();
+		}
+	}
+
+	// Check for barbarian rage bonus
+	if ((m_agent->getFeatures() & F_BARBARIAN_RAGE) && (m_curProps & MELEE)) {
+		auto brt = m_agent->getTrkr<BarbarianRageTrkr>();
+		if (brt->isActive()) {
+			int rageBonus = brt->getDmgBonus();
+			LOG(m_agent->getName() + " is raging and adds " + std::to_string(rageBonus));
+			baseAttack += rageBonus;
 		}
 	}
 

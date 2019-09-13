@@ -1,0 +1,64 @@
+#player name and level
+PLAYER Thulkrim 1
+
+#archetype
+ARCH BRAWLER
+
+#str dex con ntl wis cha
+ATTR 4 1 3 -2 -2 1
+
+#ac spell_dc
+ACDC 14 0
+
+#maxHP
+HP 15
+
+#prof_bonus
+PROFBONUS 2
+
+#save proficiencies
+SAVEPROFS
+	STR
+	CON
+ENDSAVEPROFS
+
+#ability proficiencies
+ABILITYPROFS
+	ATHLETICS
+	INTIMIDATION
+ENDABILITYPROFS
+
+#spell_slots
+SLOTS 0 0 0 0 0 0 0 0 0
+
+#spellbook
+SPELLS
+
+ENDSPELLS
+
+#loadout
+LOADOUT
+WEAPONS
+	GREATAXE
+	HANDAXE
+ENDWEAPONS
+
+#weapon proficiencies
+WPROF
+ENDWPROF
+
+#weapon property proficiencies
+PPROF
+	SIMPLE
+	MARTIAL
+ENDPPROF
+
+ENDLOADOUT
+
+#features
+FEATURES
+	BARBARIAN_RAGE
+	DWARVEN_RESILIENCE
+ENDFEATURES
+
+ENDPLAYER

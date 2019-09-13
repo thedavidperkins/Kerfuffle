@@ -324,6 +324,12 @@ void Player::takeDamage(Attack* attack) {
 				return;
 			}
 		}
+
+		if (m_features & F_BARBARIAN_RAGE) {
+			auto t = getTrkr<BarbarianRageTrkr>();
+			t->cancelRage();
+		}
+
 		m_alive = false;
 		m_stable = false;
 		if (m_HP < (-m_maxHP / 2)) {

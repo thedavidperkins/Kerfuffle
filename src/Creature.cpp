@@ -45,6 +45,8 @@ Creature::Creature()
 	, m_hadAdvantage(false)
 	, m_hadDisadvantage(false)
 	, m_friends(nullptr)
+	, m_atkdThisTurn(false)
+	, m_tookDmgThisTurn(false)
 	, m_x(0)
 	, m_y(0)
 	, m_cell(nullptr)
@@ -130,6 +132,8 @@ Creature::Creature(const Creature* rhs)
 	, m_hadAdvantage(false)
 	, m_hadDisadvantage(false)
 	, m_friends(nullptr)
+	, m_atkdThisTurn(false)
+	, m_tookDmgThisTurn(false)
 	, m_x(rhs->m_x)
 	, m_y(rhs->m_y)
 	, m_cell(nullptr)
@@ -214,6 +218,8 @@ void Creature::takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>&
 	m_actions = m_reaction = 1;
 	m_movementRemaining = (float)m_speed;
 	m_dodge = false;
+	m_tookDmgThisTurn = false;
+	m_atkdThisTurn = false;
 
 	for (Action* action : m_actionsAvailable)
 	{
@@ -355,17 +361,34 @@ int Creature::rolld20Dis(ROLL_TYPE rollType) {
 
 
 int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
-	int roll;
+	bool hasAdvantage = false;
+	bool hasDisadvantage = false;
+
 	if (
 		((threat & C_FRIGHTENED)    &&     (m_features & F_BRAVE))                ||
 		((threat & C_CHARMED)       &&     (m_features & F_FEY_ANCESTRY))         ||
 		((threat & C_POISONED)      &&     (m_features & F_DWARVEN_RESILIENCE))
 		) {
-		roll = rolld20Adv(R_SAVING_THROW);
+		hasAdvantage = true;
+	}
+	else if ((m_features & F_BARBARIAN_RAGE) && (sc == STR)) {
+		if (getTrkr<BarbarianRageTrkr>()->isActive()) {
+			hasAdvantage = true;
+		}
+	}
+	
+	int roll;
+
+	if (hasAdvantage && !hasDisadvantage) {
+		roll = rolld20Adv(R_ABILITY_CHECK);
+	}
+	else if (hasDisadvantage && !hasAdvantage) {
+		roll = rolld20Dis(R_ABILITY_CHECK);
 	}
 	else {
-		roll = rolld20(R_SAVING_THROW);
+		roll = rolld20(R_ABILITY_CHECK);
 	}
+
 	uint32_t fullRoll = roll + m_abilityMods[sc] + m_savingThrowProfs[sc];
 	LOG(m_name + " rolled a saving throw of " + std::to_string(fullRoll));
 	return fullRoll;
@@ -389,12 +412,25 @@ int Creature::abilityCheck(const std::vector<CHECK_TYPE>& abilities) {
 
 
 int Creature::abilityCheck(ABILITY_SCORES sc) {
-	if (m_condition & C_POISONED)
-	{
+	bool hasAdvantage = false;
+	bool hasDisadvantage = false;
+
+	if (m_condition & C_POISONED) {
+		hasDisadvantage = true;
+	}
+	else if ((m_features & F_BARBARIAN_RAGE) && (sc == STR)) {
+		if (getTrkr<BarbarianRageTrkr>()->isActive()){
+			hasAdvantage = true;
+		}
+	}
+
+	if( hasAdvantage && !hasDisadvantage) {
+		return rolld20Adv(R_ABILITY_CHECK) + m_abilityMods[sc];
+	}
+	else if (hasDisadvantage && !hasAdvantage) {
 		return rolld20Dis(R_ABILITY_CHECK) + m_abilityMods[sc];
 	}
-	else
-	{
+	else {
 		return rolld20(R_ABILITY_CHECK) + m_abilityMods[sc];
 	}
 }
@@ -783,8 +819,18 @@ void Creature::healBy(int healing) {
 
 
 bool Creature::hasDmgResistance(DMG_TYPE dmgType) {
+	bool isRaging = false;
+	if (m_features & F_BARBARIAN_RAGE) {
+		isRaging = getTrkr<BarbarianRageTrkr>()->isActive();
+	}
+
 	switch (dmgType)
 	{
+	case BLUDGEONING:
+	case PIERCING:
+	case SLASHING:
+		return isRaging;
+		break;
 	case POISON:
 		return ( m_features & F_DWARVEN_RESILIENCE );
 		break;

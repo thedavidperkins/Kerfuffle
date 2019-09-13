@@ -141,6 +141,11 @@ public:
 
 	bool hasDmgResistance(DMG_TYPE dmgType);
 
+	bool atkdThisTurn() { return m_atkdThisTurn; }
+	void setAtkdThisTurn() { m_atkdThisTurn = true; }
+	bool tookDmgThisTurn() { return m_tookDmgThisTurn; }
+	void setTookDmgThisTurn() { m_tookDmgThisTurn = true; }
+
 protected:
 	Creature();
 	Creature(const Creature* rhs);
@@ -217,6 +222,8 @@ protected:
 	bool m_hadAdvantage;
 	bool m_hadDisadvantage;
 	std::vector<Creature*>* m_friends;
+	bool m_atkdThisTurn;
+	bool m_tookDmgThisTurn;
 
 	// Position
 	int m_x;

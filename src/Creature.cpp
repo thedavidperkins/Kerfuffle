@@ -471,7 +471,7 @@ void Creature::_resetFtreTrkrs() {
 void Creature::_setupSpellTrkrs() {
 	for (SPELLS s : m_spellList) {
 		m_spellbook[s] = Spell::makeSpell(s, this);
-		if (isActionSpell(s)) {
+		if (actionTimingFromSpl(s) & ACTION_TIMING_ACTION) {
 			m_actionsAvailable.push_back(new SpellAction(s, this, m_spellbook[s]));
 		}
 	}

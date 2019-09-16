@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "Archetypes.h"
+#include "enums_common.h"
 #include "Features.h"
 #include "Spell.h"
 

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <map>
 
-#include "Archetypes.h"
+#include "enums_common.h"
 #include "Features.h"
 #include "Spell.h"
 #include "Weapons.h"

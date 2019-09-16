@@ -149,7 +149,7 @@
     <ClInclude Include="include\FeatureAction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Archetypes.h">
+    <ClInclude Include="include\enums_common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

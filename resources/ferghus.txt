@@ -1,0 +1,78 @@
+#player name and level
+PLAYER Ferghus 1
+
+#archetype
+ARCH SUPPORT_CASTER
+
+#str dex con ntl wis cha
+ATTR -1 2 0 2 3 3
+
+#ac spell_dc
+ACDC 13 0
+
+#speed
+SPEED 30
+
+#maxHP
+HP 8
+
+#prof_bonus
+PROFBONUS 2
+
+#save proficiencies
+SAVEPROFS
+	INT
+	WIS
+ENDSAVEPROFS
+
+#ability proficiencies
+ABILITYPROFS
+	INSIGHT
+	MEDICINE
+	NATURE
+	RELIGION
+ENDABILITYPROFS
+
+#spell_slots
+SLOTS 2 0 0 0 0 0 0 0 0
+
+#spellbook
+SPELLS
+THORNWHIP
+HEALING_WORD
+THUNDERWAVE
+ENDSPELLS
+
+#loadout
+LOADOUT
+WEAPONS
+	QUARTERSTAFF
+ENDWEAPONS
+
+#weapon proficiencies
+WPROF
+	CLUB
+	DAGGER
+	DART
+	JAVELIN
+	MACE
+	QUARTERSTAFF
+	SCIMITAR
+	SICKLE
+	SLING
+	SPEAR
+ENDWPROF
+
+#weapon property proficiencies
+PPROF
+ENDPPROF
+
+SHIELD
+
+ENDLOADOUT
+
+#features
+FEATURES
+ENDFEATURES
+
+ENDPLAYER

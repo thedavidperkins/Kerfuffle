@@ -7,8 +7,8 @@ ARCH BRAWLER
 #str dex con ntl wis cha
 ATTR 3 0 2 -1 1 2
 
-#ac spell_dc
-ACDC 16 0
+#ac spell_dc spell_modifier
+ACDCMOD 16 0 0
 
 #speed
 SPEED 30

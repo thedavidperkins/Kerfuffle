@@ -4,11 +4,13 @@
 #include <vector>
 #include <string>
 
+#include "enums_common.h"
+
 class Creature;
 
 typedef __int64 FEATURE_BIT;
 
-#define FEATURE_DEF(className, bitName, bitVal, isAction) \
+#define FEATURE_DEF(className, bitName, bitVal, actionTiming) \
 const FEATURE_BIT F_##bitName = bitVal;
 
 #include "FeatureDefs.inl"
@@ -26,6 +28,8 @@ public:
 	static FeatureTrkr* makeTracker(FEATURE_BIT type, Creature* owner);
 	virtual void reset() = 0;
 	virtual ~FeatureTrkr() {}
+
+	virtual bool isEmpty() { return false; }
 protected:
 	FeatureTrkr(FEATURE_BIT ftre, Creature* owner) : m_ftre(ftre), m_owner(owner) {};
 	FeatureTrkr(const FeatureTrkr& rhs) {}
@@ -41,6 +45,8 @@ class EmptyTrkr : public FeatureTrkr {
 public:
 	EmptyTrkr(FEATURE_BIT ftre, Creature* owner) : FeatureTrkr(ftre, owner) {}
 	virtual void reset() {}
+
+	virtual bool isEmpty() { return true; }
 };
 #define EMPTY_TRKR(className, bitName)							\
 class className : public EmptyTrkr {							\
@@ -52,6 +58,7 @@ EMPTY_TRKR(BraveTrkr, F_BRAVE);
 EMPTY_TRKR(SavageAttacksTrkr, F_SAVAGE_ATTACKS);
 EMPTY_TRKR(FeyAncestryTrkr, F_FEY_ANCESTRY);
 EMPTY_TRKR(DwarvenResilienceTrkr, F_DWARVEN_RESILIENCE);
+EMPTY_TRKR(GnomeCunningTrkr, F_GNOME_CUNNING);
 
 //=================================================================================
 
@@ -126,11 +133,11 @@ private:
 template <class T>
 inline FEATURE_BIT classBit() { return 0; }
 
-#define FEATURE_DEF(className, bitName, bitVal, isAction) \
+#define FEATURE_DEF(className, bitName, bitVal, actionTiming) \
 template <> inline FEATURE_BIT classBit<className##Trkr>() { return F_##bitName; }
 
 #include "FeatureDefs.inl"
 
-bool isActionFeature(FEATURE_BIT feature);
+ACTION_TIMING getFeatureActionTiming(FEATURE_BIT feature);
 
 #endif//KERF_FEATURES_H

@@ -20,5 +20,16 @@ enum ACTION_TIMING_BIT {
 };
 typedef uint16_t ACTION_TIMING;
 
+
+enum ABILITY_SCORES {
+	STR = 0,
+	DEX,
+	CON,
+	INT,
+	WIS,
+	CHA,
+	N_ABILITY_SCORES
+};
+
 #endif // !KERF_ENUMS_COMMON_H
 

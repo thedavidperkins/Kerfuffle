@@ -20,6 +20,7 @@ Creature::Creature()
 	, m_chkProfs{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 	, m_AC(0)
 	, m_spellDC(0)
+	, m_spellModifier(0)
 	, m_init(0)
 	, m_alive(true)
 	, m_dead(false)
@@ -97,6 +98,7 @@ Creature::Creature(const Creature* rhs)
 	}
 	, m_AC(rhs->m_AC)
 	, m_spellDC(rhs->m_spellDC)
+	, m_spellModifier(rhs->m_spellModifier)
 	, m_init(0)
 	, m_alive(true)
 	, m_dead(false)
@@ -195,10 +197,9 @@ bool Creature::checkHit(Attack* attack) {
 }
 
 
-void Creature::takeDamage(Attack* attack) {
+void Creature::takeDamage(int damage, DMG_TYPE type) {
 	// reduce m_tempHP first
-	int roll = attack->dmg(this);
-	int diff = m_tempHP - roll;
+	int diff = m_tempHP - damage;
 	if (diff > 0) {
 		m_tempHP = diff;
 	}
@@ -208,8 +209,13 @@ void Creature::takeDamage(Attack* attack) {
 	else {
 		m_HP += diff;
 	}
-	LOG(m_name + " takes " + std::to_string(roll) + " " + dmgTypeToString(attack->dmgType()) + " damage.");
+	LOG(m_name + " takes " + std::to_string(damage) + " " + dmgTypeToString(type) + " damage.");
 	LOG(m_name + " is left with " + std::to_string(m_HP) + " hit points.");
+}
+
+
+void Creature::takeDamage(Attack* attack) {
+	takeDamage(attack->dmg(this), attack->dmgType());
 }
 
 
@@ -360,7 +366,7 @@ int Creature::rolld20Dis(ROLL_TYPE rollType) {
 }
 
 
-int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
+int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat, bool isMagic) {
 	bool hasAdvantage = false;
 	bool hasDisadvantage = false;
 
@@ -375,6 +381,9 @@ int Creature::savingThrow(ABILITY_SCORES sc, CONDITION threat) {
 		if (getTrkr<BarbarianRageTrkr>()->isActive()) {
 			hasAdvantage = true;
 		}
+	}
+	else if (isMagic && (m_features & F_GNOME_CUNNING) & (sc == INT || sc == WIS || sc == CHA)) {
+		hasAdvantage = true;
 	}
 	
 	int roll;
@@ -440,16 +449,14 @@ void Creature::_setupFtreTrkrs() {
 	for (FEATURE_BIT i = 1; i <= m_features; i <<= 1) {
 		if (m_features & i) {
 			FeatureTrkr* trkr = FeatureTrkr::makeTracker(i, this);
-			if (dynamic_cast<EmptyTrkr*>(trkr) != nullptr) {
+			if (trkr->isEmpty()) {
 				delete trkr;
 			}
 			else {
 				m_ftreTrkrs.insert({ i, trkr });
-				if (isActionFeature(i))
-				{
+				if (getFeatureActionTiming(i) == ACTION_TIMING_ACTION) {
 					ActionFeatureTrkr* actionTracker = dynamic_cast<ActionFeatureTrkr*>(trkr);
-					if (actionTracker == nullptr)
-					{
+					if (actionTracker == nullptr) {
 						throw std::runtime_error("Action tracker not found for action feature");
 					}
 

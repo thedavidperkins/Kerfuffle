@@ -14,6 +14,7 @@ public:
 	virtual ~Player();
 
 	virtual void takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) override;
+	virtual void takeDamage(int damage, DMG_TYPE type) override;
 	virtual void takeDamage(Attack* attack) override;
 	virtual bool deathCheck() override;
 	virtual bool prepNextAttack(Attack* atk, Creature* target) override;
@@ -49,6 +50,7 @@ private:
 	);
 	void _sortLoadouts(Creature* target = nullptr);
 	void _cleanupBonusActions();
+	void _checkDmg();
 
 	int m_level;
 

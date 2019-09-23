@@ -100,8 +100,8 @@ bool Player::_defineFromStream(std::stringstream& defStream, std::string& errSta
 				>> m_abilityMods[WIS] 
 				>> m_abilityMods[CHA];
 		}
-		else if (token == "ACDC") {
-			procLine >> m_AC >> m_spellDC;
+		else if (token == "ACDCMOD") {
+			procLine >> m_AC >> m_spellDC, m_spellModifier;
 		}
 		else if (token == "HP") {
 			procLine >> m_maxHP;
@@ -312,8 +312,8 @@ void Player::takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foe
 	_cleanupBonusActions();
 }
 
-void Player::takeDamage(Attack* attack) {
-	Creature::takeDamage(attack);
+
+void Player::_checkDmg() {
 	if (m_HP <= 0) {
 		if (m_features & F_RELENTLESS_ENDURANCE) {
 			auto t = getTrkr<RelentlessEnduranceTrkr>();
@@ -333,7 +333,7 @@ void Player::takeDamage(Attack* attack) {
 		m_alive = false;
 		m_stable = false;
 		if (m_HP < (-m_maxHP / 2)) {
-			LOG(m_name + " dies with hp pushed to " + std::to_string(m_HP) + " versus max hp " + std::to_string(m_maxHP) );
+			LOG(m_name + " dies with hp pushed to " + std::to_string(m_HP) + " versus max hp " + std::to_string(m_maxHP));
 			m_dead = true;
 		}
 		else {
@@ -343,6 +343,18 @@ void Player::takeDamage(Attack* attack) {
 			m_deathFails = 0;
 		}
 	}
+}
+
+
+void Player::takeDamage(int damage, DMG_TYPE dmgType) {
+	Creature::takeDamage(damage, dmgType);
+	_checkDmg();
+}
+
+
+void Player::takeDamage(Attack* attack) {
+	Creature::takeDamage(attack);
+	_checkDmg();
 }
 
 

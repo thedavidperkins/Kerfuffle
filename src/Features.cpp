@@ -10,7 +10,7 @@
 static constexpr int TURNS_PER_MINUTE = 10;
 
 
-#define FEATURE_DEF(className, bitName, bitVal, isAction) \
+#define FEATURE_DEF(className, bitName, bitVal, actionTiming) \
 { #bitName, F_##bitName },
 
 
@@ -28,21 +28,14 @@ bool ftrFrmStr(const std::string& str, FEATURE_BIT& bit) {
 }
 
 
+#define FEATURE_DEF(className, bitName, bitVal, actionTiming)	\
+	case F_##bitName:										\
+		return new className##Trkr(owner);
+
 FeatureTrkr* FeatureTrkr::makeTracker(FEATURE_BIT type, Creature* owner) {
 	switch (type)
 	{
-	case F_LAY_ON_HANDS:
-		return new LayOnHandsTrkr(owner);
-	case F_RELENTLESS_ENDURANCE:
-		return new RelentlessEnduranceTrkr(owner);
-	case F_SNEAK_ATTACK:
-		return new SneakAttackTrkr(owner);
-	case F_BARBARIAN_RAGE:
-		return new BarbarianRageTrkr(owner);
-	case F_LUCKY:
-	case F_BRAVE:
-	case F_SAVAGE_ATTACKS:
-	case F_FEY_ANCESTRY:
+#include "FeatureDefs.inl"
 	default:
 		return new EmptyTrkr(type, owner);
 	}
@@ -220,12 +213,12 @@ int BarbarianRageTrkr::getDmgBonus() {
 //===========================================================================
 
 
-#define FEATURE_DEF(className, bitName, bitVal, isAction)			\
+#define FEATURE_DEF(className, bitName, bitVal, actionTiming)			\
 	case F_##bitName:												\
-		return isAction;
+		return actionTiming;
 
 
-bool isActionFeature(FEATURE_BIT feature) {
+ACTION_TIMING getFeatureActionTiming(FEATURE_BIT feature) {
 	switch (feature)
 	{
 #include "FeatureDefs.inl"

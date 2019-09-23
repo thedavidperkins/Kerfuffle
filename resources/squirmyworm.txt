@@ -3,8 +3,8 @@ FOE SquWorm
 ARCH BRAWLER
 #str dex con ntl wis cha
 ATTR 1 1 1 -3 -1 -4
-#ac spell_dc
-ACDC 12 0
+#ac spell_dc spell_modifier
+ACDCMOD 12 0 0
 #maxHP
 HP 12
 #spell_slots
@@ -16,6 +16,6 @@ ATK
 ATKBONUS 1
 DMGROLL 2d4+1
 TYPE PIERCING
-EFFECT POISONING 12 CON
+EFFECT POISONING 12 CON MAGIC
 ENDATK
 ENDFOE

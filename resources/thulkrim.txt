@@ -7,8 +7,8 @@ ARCH BRAWLER
 #str dex con ntl wis cha
 ATTR 4 1 3 -2 -2 1
 
-#ac spell_dc
-ACDC 14 0
+#ac spell_dc spell_modifier
+ACDCMOD 14 0 0
 
 #maxHP
 HP 15

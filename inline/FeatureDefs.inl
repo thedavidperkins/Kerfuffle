@@ -1,5 +1,5 @@
 #ifndef FEATURE_DEF
-#define FEATURE_DEF(className, bitName, bitVal)
+#define FEATURE_DEF(className, bitName, bitVal, actionTiming)
 #endif
 
 FEATURE_DEF(Lucky, LUCKY, 0x1, false)
@@ -11,5 +11,6 @@ FEATURE_DEF(LayOnHands, LAY_ON_HANDS, 0x20, true)
 FEATURE_DEF(FeyAncestry, FEY_ANCESTRY, 0x40, false)
 FEATURE_DEF(DwarvenResilience, DWARVEN_RESILIENCE, 0x80, false)
 FEATURE_DEF(BarbarianRage, BARBARIAN_RAGE, 0x100, false)
+FEATURE_DEF(GnomeCunning, GNOME_CUNNING, 0x200, false)
 
 #undef FEATURE_DEF

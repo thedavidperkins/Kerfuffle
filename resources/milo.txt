@@ -7,8 +7,8 @@ ARCH ROGUE
 #str dex con ntl wis cha
 ATTR 1 3 1 0 -1 2
 
-#ac spell_dc
-ACDC 14 0
+#ac spell_dc spell_modifier
+ACDCMOD 14 0 0
 
 #maxHP
 HP 9

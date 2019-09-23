@@ -15,16 +15,6 @@ class Cell;
 class Action;
 class Attack;
 
-enum ABILITY_SCORES {
-	STR = 0,
-	DEX,
-	CON,
-	INT,
-	WIS,
-	CHA,
-	N_ABILITY_SCORES
-};
-
 enum CHECK_TYPE {
 	ACRO_CHK = 0,
 	ANIM_CHK,
@@ -59,6 +49,7 @@ public:
 	virtual ~Creature();
 	void init();
 	virtual void takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) = 0;
+	virtual void takeDamage(int damage, DMG_TYPE type);
 	virtual void takeDamage(Attack* attack);
 	virtual bool deathCheck() = 0;
 	virtual bool prepNextAttack(Attack* atk, Creature* target) = 0;
@@ -80,6 +71,8 @@ public:
 	bool isStable() const { return m_stable; }
 	int getInit() const { return m_init; }
 	int getAMod(ABILITY_SCORES sc) const { return m_abilityMods[sc]; }
+	int getSpellMod() const { return m_spellModifier; }
+	int getSpellDC() const { return m_spellDC; }
 	bool hadAdvantage() const { return m_hadAdvantage; }
 	bool hadDisadvantage() const { return m_hadDisadvantage; }
 	int getSpeed() const { return m_speed; }
@@ -103,7 +96,7 @@ public:
 	int rolld20(ROLL_TYPE rollType); // Allow player features to intervene on rolls
 	int rolld20Adv(ROLL_TYPE rollType); // Allow player features to intervene on rolls
 	int rolld20Dis(ROLL_TYPE rollType); // Allow player features to intervene on rolls
-	int savingThrow(ABILITY_SCORES sc, CONDITION threat = 0);
+	int savingThrow(ABILITY_SCORES sc, CONDITION threat = 0, bool isMagic = false);
 	int abilityCheck(const std::vector<CHECK_TYPE>& abilities);
 	int abilityCheck(ABILITY_SCORES sc);
 
@@ -172,6 +165,7 @@ protected:
 	// difficulty classes
 	int m_AC;
 	int m_spellDC;
+	int m_spellModifier;
 
 	// initiative -- held during turn order sort in Encounter::fight()
 	int m_init;

@@ -5,3 +5,4 @@ resources\squirmyworm.txt
 resources\ferghus.txt
 resources\caedrak.txt
 resources\thulkrim.txt
+resources\variel.txt

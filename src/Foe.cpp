@@ -2,10 +2,12 @@
 #include "Foe.h"
 #include "Ring.h"
 
+
 Foe::Foe() : 
 	Creature(),
 	m_attacks()
 {}
+
 
 Foe::Foe(const Foe* rhs) :
 	Creature(rhs),
@@ -18,10 +20,12 @@ Foe::Foe(const Foe* rhs) :
 	}
 }
 
+
 Foe::Foe(std::stringstream& defStream) : Foe() {
 	std::string errStatus;
 	if (!_defineFromStream(defStream, errStatus)) throw std::runtime_error("Error in foe definition: " + errStatus);
 }
+
 
 Foe::~Foe() {
 	for (auto& atk : m_attacks) {
@@ -31,6 +35,7 @@ Foe::~Foe() {
 		}
 	}
 }
+
 
 bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus) {
 	std::string line, token;
@@ -75,8 +80,8 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 				>> m_abilityMods[WIS]
 				>> m_abilityMods[CHA];
 		}
-		else if (token == "ACDC") {
-			procLine >> m_AC >> m_spellDC;
+		else if (token == "ACDCMOD") {
+			procLine >> m_AC >> m_spellDC >> m_spellModifier;
 		}
 		else if (token == "HP") {
 			procLine >> m_maxHP;
@@ -219,7 +224,9 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 						errStatus = "Invalid attack save ability score: " + token;
 						return false;
 					}
-					attackEffects.push_back({ type, dc, saveType });
+					bool isMagic = (procLine >> token && token == "MAGIC");
+
+					attackEffects.push_back({ type, dc, saveType, isMagic });
 				}
 				else if (token == "ENDATK") {
 					Attack* atk = new Attack(this);
@@ -238,11 +245,14 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 	return false;
 }
 
+
 void Foe::getAttackList(std::vector<Attack*>& atks) {
 	atks = m_attacks;
 }
 
+
 void Foe::cleanupAttackList(std::vector<Attack*>& atks) {}
+
 
 Foe* Foe::makeCopy() {
 	if (m_copy != nullptr) {
@@ -254,13 +264,14 @@ Foe* Foe::makeCopy() {
 	return ret;
 }
 
+
 void Foe::takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) {
 	m_spellCast = 1;
 	Creature::takeTurn(foes, party);
 }
 
-void Foe::takeDamage(Attack* attack) {
-	Creature::takeDamage(attack);
+
+void Foe::_checkDmg() {
 	if (m_HP <= 0) {
 		m_alive = false;
 		m_dead = true;
@@ -269,11 +280,25 @@ void Foe::takeDamage(Attack* attack) {
 	}
 }
 
+
+void Foe::takeDamage(int damage, DMG_TYPE type) {
+	Creature::takeDamage(damage, type);
+	_checkDmg();
+}
+
+
+void Foe::takeDamage(Attack* attack) {
+	Creature::takeDamage(attack);
+	_checkDmg();
+}
+
+
 bool Foe::hasAttackProp(WEAPON_PROPS_BITS prop, bool) {
 	// only check first attack, because that will be the first used 
 	// (until we implement intelligent reordering of attacks, if ever)
 	return m_attacks[0]->getProps() & prop;
 }
+
 
 int Foe::getMaxAtkRange(bool) {
 	int max = 0;
@@ -285,6 +310,7 @@ int Foe::getMaxAtkRange(bool) {
 	}
 	return max;
 }
+
 
 bool Foe::prepNextAttack(Attack* atk, Creature* target) {
 	return Creature::prepNextAttack(atk, target);

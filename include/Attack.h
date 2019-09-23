@@ -7,8 +7,9 @@ class Loadout;
 
 #include "Action.h"
 #include "Weapons.h"
-#include "Creature.h"
 
+
+class Creature;
 
 enum ATTACK_EFFECT_TYPE
 {
@@ -21,6 +22,7 @@ struct AttackEffect {
 	ATTACK_EFFECT_TYPE type;
 	int dc;
 	ABILITY_SCORES saveType;
+	bool isMagic;
 };
 
 

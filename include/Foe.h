@@ -11,6 +11,7 @@ public:
 	~Foe();
 
 	virtual void takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) override;
+	virtual void takeDamage(int damage, DMG_TYPE type) override;
 	virtual void takeDamage(Attack* attack) override;
 	virtual bool deathCheck() { return false; }
 	virtual bool prepNextAttack(Attack* atk, Creature* target);
@@ -24,6 +25,8 @@ private:
 	virtual bool _defineFromStream(std::stringstream& defStream, std::string& errStatus);
 	Foe(const Foe* rhs);
 	Foe();
+
+	void _checkDmg();
 
 	std::vector<Attack*> m_attacks;
 };

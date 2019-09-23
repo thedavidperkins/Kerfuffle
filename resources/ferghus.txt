@@ -7,8 +7,8 @@ ARCH SUPPORT_CASTER
 #str dex con ntl wis cha
 ATTR -1 2 0 2 3 3
 
-#ac spell_dc
-ACDC 13 0
+#ac spell_dc spell_modifier
+ACDCMOD 13 13 5
 
 #speed
 SPEED 30

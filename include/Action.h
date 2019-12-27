@@ -34,7 +34,7 @@ public:
 	virtual bool invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) = 0;
 	virtual void resetActionState() {}
 
-	virtual void setPriorityWeight(ARCHETYPE arch) = 0;
+	virtual void setPriorityWeight(ARCHETYPE arch, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) = 0;
 protected:
 	Action(ACTION_TYPE type, Creature* user);
 

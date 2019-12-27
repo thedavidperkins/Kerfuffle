@@ -19,6 +19,6 @@ bool DodgeAction::invoke(std::vector<Creature*>&, std::vector<Creature*>&) {
 }
 
 
-void DodgeAction::setPriorityWeight(ARCHETYPE arch) {
+void DodgeAction::setPriorityWeight(ARCHETYPE, const std::vector<Creature*>&, const std::vector<Creature*>&) {
 	m_weight = 5;
 }

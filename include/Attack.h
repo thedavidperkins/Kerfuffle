@@ -14,6 +14,7 @@ class Creature;
 enum ATTACK_EFFECT_TYPE
 {
 	A_POISONING = 0,
+	A_CHARGE,
 	N_ATTACK_EFFECT_TYPES
 };
 
@@ -33,9 +34,9 @@ public:
 	void load(DMG_TYPE type, int atkBonus, const std::string& dmgString, 
 		int dmgBonus = -1,
 		WEAPON_PROPS props = 0,
-		int minRange = 0,
-		int maxRange = 5,
-		int disRange = 5,
+		float minRange = 0,
+		float maxRange = 5,
+		float disRange = 5,
 		const std::vector<AttackEffect>& effects = {}
 	);
 	void load(const Attack& rhs);
@@ -44,6 +45,7 @@ public:
 	int dmg(Creature* target);
 	DMG_TYPE dmgType();
 	bool isLoaded() const { return m_loaded; }
+	bool isMelee() const { return m_maxRange <= 5; }
 	void setDisadvantage(bool dis) { m_disadvantage = dis; }
 	void setAdvantage(bool adv) { m_advantage = adv; }
 	WEAPON_PROPS getProps() const { return m_curProps; }

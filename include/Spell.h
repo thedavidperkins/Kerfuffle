@@ -5,13 +5,14 @@
 #include "Attack.h"
 #include "AreaAttack.h"
 #include "enums_common.h"
+#include "priorities.h"
 
 class Creature;
 
 const int SPELL_LVL_COUNT = 9;
 
 
-enum SPELL_LEVEL_BITS {
+enum SPELL_LEVEL_BITS : uint16_t {
 	CANTRIP = 0,
 	L1 = 1 << 0,
 	L2 = 1 << 1,
@@ -63,7 +64,9 @@ public:
 	virtual bool cast() = 0;
 	std::string getName() const { return m_name; }
 	SPELLS getSpellType() const { return m_spl; }
-	virtual void reset() {}																				\
+	virtual void reset() {}
+
+	virtual void adjustWeight(uint32_t& weight, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 protected:
 	Creature* m_user;
 

@@ -1,0 +1,23 @@
+FOE GBoar
+#archetype
+ARCH BRAWLER
+#str dex con ntl wis cha
+ATTR 3 0 3 -4 -2 -3
+#ac spell_dc spell_modifier
+ACDCMOD 12 0 0
+#speed
+SPEED 40
+#maxHP
+HP 42
+#spell_slots
+SLOTS 0 0 0 0 0 0 0 0 0
+#spellbook
+SPELLS
+ENDSPELLS
+ATK
+ATKBONUS 5
+DMGROLL 2d6+3
+TYPE SLASHING
+EFFECT CHARGE 13 STR
+ENDATK
+ENDFOE

@@ -13,7 +13,7 @@ public:
 	virtual bool invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
 	virtual void resetActionState() { m_enemyToApproach = nullptr; }
 
-	virtual void setPriorityWeight(ARCHETYPE arch);
+	virtual void setPriorityWeight(ARCHETYPE arch, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 private:
 	Creature* m_enemyToApproach;
 };

@@ -10,8 +10,10 @@
 #include "SpellAction.h"
 
 
-constexpr uint32_t DEFAULT_SPEED = 25;
-
+constexpr float DEFAULT_SPEED = 25.f;
+constexpr uint16_t MIN_THREAT = 1;
+constexpr uint16_t MAX_THREAT = 9;
+constexpr uint32_t DAMAGE_TO_THREAT_FACTOR = 5;
 
 Creature::Creature()
 	: m_name()
@@ -54,6 +56,7 @@ Creature::Creature()
 	, m_cell(nullptr)
 	, m_speed(DEFAULT_SPEED)
 	, m_movementRemaining((float)m_speed)
+	, m_threatLevel(MIN_THREAT)
 {
 	_loadDefaultActions();
 }
@@ -143,6 +146,7 @@ Creature::Creature(const Creature* rhs)
 	, m_cell(nullptr)
 	, m_speed(rhs->m_speed)
 	, m_movementRemaining((float)m_speed)
+	, m_threatLevel(rhs->m_threatLevel)
 {
 	_loadDefaultActions();
 }
@@ -190,16 +194,50 @@ void Creature::initRoll() {
 }
 
 
+SPELL_LEVELS Creature::getSlotsAvailableMask() const {
+	uint16_t iter = 0;
+	SPELL_LEVELS mask = 0;
+	for (uint16_t bit = L1; bit <= L9; bit <<= 1) {
+		if (m_spellSlots[iter++] > 0) {
+			mask |= bit;
+		}
+	}
+
+	return mask;
+}
+
+
+SPELL_LEVEL_BITS Creature::getHighestAvailableSpellLevel() const {
+	SPELL_LEVELS mask = getSlotsAvailableMask();
+	for (uint16_t bit = L9; bit >= L1; bit >>= 1) {
+		if (mask & bit) {
+			return (SPELL_LEVEL_BITS)bit;
+		}
+	}
+
+	return CANTRIP;
+}
+
+
 bool Creature::checkHit(Attack* attack) {
-	if (m_dodge) attack->setDisadvantage(true);
-	int crit = 0;
+	if (m_dodge) {
+		attack->setDisadvantage(true);
+	}
+	if (m_condition & C_PRONE) {
+		if (attack->isMelee()) {
+			attack->setAdvantage(true);
+		}
+		else {
+			attack->setDisadvantage(true);
+		}
+	}
 	int roll = attack->atk();
 	LOG("Target " + m_name + " has AC " + std::to_string(m_AC));
 	return roll >= m_AC;
 }
 
 
-void Creature::takeDamage(int damage, DMG_TYPE type) {
+void Creature::takeDamage(int damage, DMG_TYPE type, Creature* agent) {
 	// reduce m_tempHP first
 	int diff = m_tempHP - damage;
 	if (diff > 0) {
@@ -213,11 +251,13 @@ void Creature::takeDamage(int damage, DMG_TYPE type) {
 	}
 	LOG(m_name + " takes " + std::to_string(damage) + " " + dmgTypeToString(type) + " damage.");
 	LOG(m_name + " is left with " + std::to_string(m_HP) + " hit points.");
+
+	agent->adjustThreat(damage);
 }
 
 
-void Creature::takeDamage(Attack* attack) {
-	takeDamage(attack->dmg(this), attack->dmgType());
+void Creature::takeDamage(Attack* attack, Creature* agent) {
+	takeDamage(attack->dmg(this), attack->dmgType(), agent);
 }
 
 
@@ -308,7 +348,7 @@ Creature* Creature::chooseAttackTarget(const std::vector<Creature*>& enemies) {
 void Creature::_setActionPriorities(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
 	for (Action* a : m_actionsAvailable)
 	{
-		a->setPriorityWeight(m_archetype);
+		a->setPriorityWeight(m_archetype, friends, enemies);
 	}
 
 	std::sort(m_actionsAvailable.begin(), m_actionsAvailable.end(), [](Action *a, Action* b) {
@@ -586,7 +626,7 @@ bool Creature::prepNextAttack(Attack* atk, Creature* target) {
 
 bool Creature::_checkRangedAttack(Attack* atk, Creature* target) {
 	float distance = dist(m_cell, target->getCell());
-	int min, max, dis;
+	float min, max, dis;
 	atk->getMinMaxDisRange(min, max, dis);
 	if (distance < min) {
 		atk->setDisadvantage(true);
@@ -602,7 +642,7 @@ bool Creature::_checkRangedAttack(Attack* atk, Creature* target) {
 }
 
 
-bool Creature::moveToRangeOf(Creature* target, int range) {
+bool Creature::moveToRangeOf(Creature* target, float range) {
 	if (dist(target->getCell(), m_cell) <= range) return true;
 	Ring& r = Ring::getInstance();
 	Cell* dest = nullptr;
@@ -640,7 +680,19 @@ bool Creature::moveToAdjacent(Creature* target) {
 
 
 bool Creature::moveToCell(Cell* dest) {
-	if (m_movementRemaining < 5) return false;
+	if (m_condition & C_PRONE) {
+		if (m_movementRemaining < (m_speed / 2)) {
+			return false;
+		}
+		else {
+			LOG(m_name + " must use half their movement to stand");
+			m_movementRemaining -= (m_speed / 2);
+			removeCondition(C_PRONE);
+		}
+	}
+	if (m_movementRemaining < 5) {
+		return false;
+	}
 	LOG(m_name + " attempts to move from cell (" + m_cell->coordString() + ") to cell (" + dest->coordString() + ")");
 	Ring& r = Ring::getInstance();
 	bool ret = true;
@@ -678,10 +730,17 @@ void Creature::cancelDash() {
 
 
 void Creature::_finishMove(const std::vector<Creature*>& friends, const std::vector<Creature*> enemies) {
-	float distance;
-	Creature* en = findNearest(enemies, distance);
-	if (en != nullptr) {
-		moveToRangeOf(en, m_speed / 2);
+	if ((m_condition & C_PRONE) && (m_movementRemaining > (m_speed / 2))) {
+		m_movementRemaining -= m_speed / 2;
+		removeCondition(C_PRONE);
+		LOG(m_name + " stands and is no longer prone.");
+	}
+	if (m_movementRemaining >= 5) {
+		float distance;
+		Creature* en = findNearest(enemies, distance);
+		if (en != nullptr) {
+			moveToRangeOf(en, m_speed / 2);
+		}
 	}
 }
 
@@ -699,6 +758,18 @@ Creature* Creature::findNearest(const std::vector<Creature*> crtrs, float& dista
 		}
 	}
 	return ret;
+}
+
+
+void Creature::adjustThreat(uint32_t damageDealt) {
+	uint16_t tentativeThreat = damageDealt / DAMAGE_TO_THREAT_FACTOR;
+	if (tentativeThreat > m_threatLevel) {
+		m_threatLevel = tentativeThreat;
+	}
+
+	if (m_threatLevel > MAX_THREAT) {
+		m_threatLevel = MAX_THREAT;
+	}
 }
 
 
@@ -814,6 +885,16 @@ std::vector<Creature*> sortCreaturesByLeastHealth(const std::vector<Creature*> l
 		int bhp = b->getHP();
 		if (ahp == bhp) return a->getHealthLost() > b->getHealthLost();
 		return ahp < bhp;
+	});
+}
+
+
+std::vector<Creature*> sortCreaturesByMostThreat(const std::vector<Creature*> list) {
+	return sortCreaturesBy(list, [](Creature* a, Creature* b) {
+		int athr = a->getThreatLevel();
+		int bthr = b->getThreatLevel();
+		if (athr == bthr) return a->getHealthLost() > b->getHealthLost();
+		return athr > bthr;
 	});
 }
 

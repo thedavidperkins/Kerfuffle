@@ -100,13 +100,21 @@ END_SPELL_CLASS
 //===========================================================
 
 
+BEGIN_SPELL_CLASS(FireBolt, FIRE_BOLT)
+protected:
+	Attack m_attack;
+END_SPELL_CLASS
+
+
+//===========================================================
+
+
 // Dummy definition for virtual spell functions awaiting full definition
 #define SPELL_DEF_BASIC(className, spellName )	\
 BEGIN_SPELL_CLASS(className, spellName)			\
 END_SPELL_CLASS
 
 
-SPELL_DEF_BASIC(FireBolt, FIRE_BOLT)
 SPELL_DEF_BASIC(RayOfFrost, RAY_OF_FROST)
 SPELL_DEF_BASIC(ShockingGrasp, SHOCKING_GRASP)
 SPELL_DEF_BASIC(Thornwhip, THORNWHIP)

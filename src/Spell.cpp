@@ -50,6 +50,30 @@ static const SpellDetails& getSpellDetails(std::string name) {
 }
 
 
+static std::vector<Creature*> getPriorityTargetsInRange(
+	const Creature* agent,
+	float range,
+	const std::vector<Creature*>& targets,
+	std::function<bool(Creature*)> meetsPriority,
+	std::function<bool(Creature*, Creature*)> orderFunc )
+{
+	std::vector<Creature*> targetsInRange = agent->getCreaturesInRange(targets, range);
+	std::sort(targetsInRange.begin(), targetsInRange.end(), orderFunc);
+	std::vector<Creature*> validTargets;
+	for (auto iter = targetsInRange.begin(); iter != targetsInRange.end(); --iter)
+	{
+		if (meetsPriority(*iter))
+		{
+			validTargets.push_back(*iter);
+		}
+		else
+		{
+			break;
+		}
+	}
+	return validTargets;
+}
+
 
 bool splFrmStr(const std::string& str, SPELLS& spl) {
 	const SpellDetails& deets = getSpellDetails(str);
@@ -149,6 +173,51 @@ bool AcidSplashSpell::cast() {
 
 //===========================================================
 
+FireBoltSpell::FireBoltSpell(Creature* user)
+	: Spell(S_FIRE_BOLT, user)
+	, m_attack(user)
+{
+	std::string dmgString = "1d10";
+	int lvl = user->getLvl();
+	if (lvl >= 17)
+	{
+		dmgString = "4d10";
+	}
+	else if (lvl >= 11)
+	{
+		dmgString = "3d10";
+	}
+	else if (lvl >= 5)
+	{
+		dmgString = "2d10";
+	}
+	m_attack.load(FIRE, user->getSpellMod(), dmgString, 0, 0, 0, 120, 120);
+}
+
+
+FireBoltSpell::~FireBoltSpell() {}
+
+
+bool FireBoltSpell::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
+	float dummy1 = -1.f;
+	float dummy2 = -1.f;
+	float maxRange = 0.f;
+	m_attack.getMinMaxDisRange(dummy1, maxRange, dummy2);
+	std::vector<Creature*> validTargets =
+		getPriorityTargetsInRange(m_user, maxRange + m_user->getRemainingRange(), enemies,
+			[](Creature* target) {
+				return target->
+			},
+		)
+}
+
+
+bool FireBoltSpell::cast() {
+	return false;
+}
+
+//===========================================================
+
 
 // Dummy implementation for virtual spell functions awaiting full implementation
 #define SPELL_SKELETON(className, spellName)														\
@@ -159,7 +228,6 @@ bool className##Spell::isUsable(const std::vector<Creature*>&, const std::vector
 }																									\
 bool className##Spell::cast() { return false; }
 
-SPELL_SKELETON(FireBolt, FIRE_BOLT)
 SPELL_SKELETON(RayOfFrost, RAY_OF_FROST)
 SPELL_SKELETON(ShockingGrasp, SHOCKING_GRASP)
 SPELL_SKELETON(Thornwhip, THORNWHIP)

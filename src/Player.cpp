@@ -11,7 +11,6 @@
 
 Player::Player() :
 	Creature(),
-	m_level(1),
 	m_bonus(1),
 	m_bonusActions(),
 	m_loadPriority(P_DAMAGE),
@@ -27,7 +26,6 @@ Player::Player() :
 
 Player::Player(const Player* rhs) :
 	Creature(rhs),
-	m_level(rhs->m_level),
 	m_bonus(1),
 	m_bonusActions(rhs->m_bonusActions), // should be okay to shallow copy this list because it should have only persistent bonus actions in initial state
 	m_loadPriority(rhs->m_loadPriority),

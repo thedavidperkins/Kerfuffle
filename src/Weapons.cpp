@@ -357,10 +357,10 @@ int maxDamage(WEAPON_TYPE wep) {
 	}
 }
 
-void wepMinMaxDisRange(WEAPON_TYPE wep, int& min, int& max, int& dis) {
-	min = 5;
-	max = 5;
-	dis = 5;
+void wepMinMaxDisRange(WEAPON_TYPE wep, float& min, float& max, float& dis) {
+	min = 5.f;
+	max = 5.f;
+	dis = 5.f;
 	switch (wep)
 	{
 	case DAGGER:
@@ -368,52 +368,52 @@ void wepMinMaxDisRange(WEAPON_TYPE wep, int& min, int& max, int& dis) {
 	case LIGHT_HAMMER:
 	case SPEAR:
 	case TRIDENT:
-		min = 0;
-		max = 20;
-		dis = 60;
+		min = 0.f;
+		max = 20.f;
+		dis = 60.f;
 		break;
 	case DART:
-		max = 20;
-		dis = 60;
+		max = 20.f;
+		dis = 60.f;
 		break;
 	case JAVELIN:
 	case SLING:
 	case HAND_CROSSBOW:
-		max = 30;
-		dis = 120;
+		max = 30.f;
+		dis = 120.f;
 		break;
 	case LIGHT_CROSSBOW:
 	case SHORTBOW:
-		max = 80;
-		dis = 320;
+		max = 80.f;
+		dis = 320.f;
 		break;
 	case GLAIVE:
 	case HALBERD:
 	case PIKE:
 	case WHIP:
-		min = 0;
-		max = 10;
-		dis = 10;
+		min = 0.f;
+		max = 10.f;
+		dis = 10.f;
 		break;
 	case LANCE:
-		max = 10;
-		dis = 10;
+		max = 10.f;
+		dis = 10.f;
 		break;
 	case BLOWGUN:
-		max = 25;
-		dis = 100;
+		max = 25.f;
+		dis = 100.f;
 		break;
 	case HEAVY_CROSSBOW:
-		max = 100;
-		dis = 400;
+		max = 100.f;
+		dis = 400.f;
 		break;
 	case LONGBOW:
-		max = 150;
-		dis = 600;
+		max = 150.f;
+		dis = 600.f;
 		break;
 	case NET:
-		min = 0;
-		dis = 15;
+		min = 0.f;
+		dis = 15.f;
 		break;
 	default:
 		break;

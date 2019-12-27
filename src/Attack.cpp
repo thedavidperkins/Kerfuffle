@@ -206,7 +206,7 @@ std::string Attack::getUser() const {
 }
 
 
-void Attack::getMinMaxDisRange(int& min, int& max, int& dis) {
+void Attack::getMinMaxDisRange(float& min, float& max, float& dis) {
 	min = m_minRange;
 	max = m_maxRange;
 	dis = m_disRange;

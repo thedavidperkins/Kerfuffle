@@ -22,7 +22,7 @@ void resetDiceSeed(std::stringstream& strm) {
 }
 
 // return a random int between 1 and cap inclusive
-int randInt(int cap) {
+int randInt(size_t cap) {
 	return (rnd() % cap) + 1;
 }
 

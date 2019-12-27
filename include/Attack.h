@@ -48,7 +48,7 @@ public:
 	void setAdvantage(bool adv) { m_advantage = adv; }
 	WEAPON_PROPS getProps() const { return m_curProps; }
 	void subtractProp(WEAPON_PROPS_BITS prop) { if (m_curProps & prop) m_curProps -= prop; }
-	void getMinMaxDisRange(int& min, int& max, int& dis);
+	void getMinMaxDisRange(float& min, float& max, float& dis);
 	void restore() { m_curProps = m_props; }
 
 	std::string getUser() const;
@@ -69,9 +69,9 @@ private:
 	bool m_advantage;
 	bool m_disadvantage;
 	bool m_crit;
-	int m_maxRange;
-	int m_minRange;
-	int m_disRange;
+	float m_maxRange;
+	float m_minRange;
+	float m_disRange;
 
 	std::vector<AttackEffect> m_attackEffects;
 };

@@ -14,7 +14,7 @@ enum ROLL_TYPE {
 	R_OTHER
 };
 
-int randInt(int cap);
+int randInt(size_t cap);
 int d0(); // stand-in function for when no damage is guaranteed
 int d4();
 int d6();

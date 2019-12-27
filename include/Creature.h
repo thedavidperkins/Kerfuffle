@@ -58,6 +58,7 @@ public:
 	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop, bool dual = false) = 0;
 	virtual void incentivizeProp(WEAPON_PROPS_BITS prop) {}
 	virtual int getMaxAtkRange(bool dual = false) = 0;
+	int getLvl() const { return m_level; }
 
 	bool checkHit(Attack* attack);
 	
@@ -115,8 +116,8 @@ public:
 
 	std::vector<Creature*> getAdjCreatures();
 	std::vector<Creature*> getAdjCreatures(const std::vector<Creature*>& candidates); // restrict list to intersection with candidates
-	std::vector<Creature*> getCreaturesInRange(float range);
-	std::vector<Creature*> getCreaturesInRange(const std::vector<Creature*>& candidates, float range); // restrict list to intersection with candidates
+	std::vector<Creature*> getCreaturesInRange(float range) const;
+	std::vector<Creature*> getCreaturesInRange(const std::vector<Creature*>& candidates, float range) const; // restrict list to intersection with candidates
 
 	float getRemainingRange();
 	Cell* getCell() { return m_cell; }
@@ -166,6 +167,7 @@ protected:
 	int m_AC;
 	int m_spellDC;
 	int m_spellModifier;
+	int m_level;
 
 	// initiative -- held during turn order sort in Encounter::fight()
 	int m_init;

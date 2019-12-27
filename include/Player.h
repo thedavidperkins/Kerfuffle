@@ -28,7 +28,6 @@ public:
 	void usedBonusAction() { m_bonus--; }
 
 	int nAttacks() const { return m_nAttacks; }
-	int getLvl() const { return m_level; }
 
 	int getProfBonus() { return m_profBonus; }
 
@@ -51,8 +50,6 @@ private:
 	void _sortLoadouts(Creature* target = nullptr);
 	void _cleanupBonusActions();
 	void _checkDmg();
-
-	int m_level;
 
 	// bonus actions
 	int m_bonus;

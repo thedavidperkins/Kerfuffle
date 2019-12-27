@@ -21,6 +21,7 @@ Creature::Creature()
 	, m_AC(0)
 	, m_spellDC(0)
 	, m_spellModifier(0)
+	, m_level(1)
 	, m_init(0)
 	, m_alive(true)
 	, m_dead(false)
@@ -99,6 +100,7 @@ Creature::Creature(const Creature* rhs)
 	, m_AC(rhs->m_AC)
 	, m_spellDC(rhs->m_spellDC)
 	, m_spellModifier(rhs->m_spellModifier)
+	, m_level(rhs->m_level)
 	, m_init(0)
 	, m_alive(true)
 	, m_dead(false)
@@ -529,7 +531,7 @@ std::vector<Creature*> Creature::getAdjCreatures(const std::vector<Creature*>& c
 }
 
 
-std::vector<Creature*> Creature::getCreaturesInRange(float range) {
+std::vector<Creature*> Creature::getCreaturesInRange(float range) const {
 	Ring& r = Ring::getInstance();
 	std::vector<Creature*> ret;
 	for (auto c : r.cellsInRange(m_cell, range)) {
@@ -541,7 +543,7 @@ std::vector<Creature*> Creature::getCreaturesInRange(float range) {
 }
 
 
-std::vector<Creature*> Creature::getCreaturesInRange(const std::vector<Creature*>& candidates, float range) {
+std::vector<Creature*> Creature::getCreaturesInRange(const std::vector<Creature*>& candidates, float range) const {
 	std::vector<Creature*> ret = getCreaturesInRange(range);
 	ret.erase(std::remove_if(ret.begin(), ret.end(), [&](const Creature* c) {
 		return (std::find(candidates.begin(), candidates.end(), c) == candidates.end());

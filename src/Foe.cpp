@@ -44,7 +44,7 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 		std::stringstream procLine(line);
 		procLine >> token;
 		if (token == "FOE") {
-			procLine >> m_name;
+			procLine >> m_name >> m_level;
 		}
 		else if (token == "SPEED") {
 			procLine >> m_speed;

@@ -7,6 +7,7 @@
 
 static std::string lAttackEffectNames[N_ATTACK_EFFECT_TYPES] = {
 	"POISONING",
+	"CHARGE"
 };
 
 
@@ -49,9 +50,9 @@ void Attack::load(Loadout* loadout, bool dual) {
 void Attack::load(DMG_TYPE type, int atkBonus, const std::string& dmgString,
 	int dmgBonus,
 	WEAPON_PROPS props,
-	int minRange,
-	int maxRange,
-	int disRange,
+	float minRange,
+	float maxRange,
+	float disRange,
 	const std::vector<AttackEffect>& effects
 ) 
 {
@@ -107,10 +108,11 @@ void Attack::unload() {
 
 int Attack::atk() {
 	int ret;
-	if (m_agent->getCondition() & C_POISONED)
+	if (m_agent->getCondition() & (C_POISONED | C_PRONE))
 	{
 		m_disadvantage = true;
 	}
+
 	if (m_advantage && !m_disadvantage) {
 		ret = m_agent->rolld20Adv(R_ATTACK_ROLL);
 	}
@@ -182,6 +184,20 @@ int Attack::dmg(Creature* target) {
 				LOG(target->getName() + " succeeded and is not poisoned!");
 			}
 		}
+
+		if (effect.type == A_CHARGE && ( m_agent->getDistanceTraveled() >= 20.f)) {
+			int chargeDmg = d6() + d6();
+			LOG(m_agent->getName() + " charged and added " + std::to_string(chargeDmg) + " damage");
+			baseAttack += chargeDmg;
+			LOG(target->getName() + " makes a " + abilToString(effect.saveType) + " saving throw against knock prone dc " + std::to_string(effect.dc));
+			if (target->savingThrow(effect.saveType, C_PRONE) < effect.dc) {
+				LOG(target->getName() + " failed the saving throw and is now prone!");
+				target->addCondition(C_PRONE);
+			}
+			else {
+				LOG(target->getName() + " succeeded and keeps their footing!");
+			}
+		}
 	}
 
 	int totalAttack = baseAttack + m_dmgBonus;
@@ -206,7 +222,7 @@ std::string Attack::getUser() const {
 }
 
 
-void Attack::getMinMaxDisRange(int& min, int& max, int& dis) {
+void Attack::getMinMaxDisRange(float& min, float& max, float& dis) {
 	min = m_minRange;
 	max = m_maxRange;
 	dis = m_disRange;
@@ -235,7 +251,7 @@ bool atkActionUsable(Creature* user, const std::vector<Creature*>& friends, cons
 	}
 
 	float range = user->getRemainingRange(); // movement range
-	int atkRange = user->getMaxAtkRange(); // attack range
+	float atkRange = user->getMaxAtkRange(); // attack range
 
 										   // Next check for ranged attack
 	if (user->hasAttackProp(RANGED, dual)) {

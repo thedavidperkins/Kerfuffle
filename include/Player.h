@@ -14,15 +14,15 @@ public:
 	virtual ~Player();
 
 	virtual void takeTurn(std::vector<Creature*>& party, std::vector<Creature*>& foes) override;
-	virtual void takeDamage(int damage, DMG_TYPE type) override;
-	virtual void takeDamage(Attack* attack) override;
+	virtual void takeDamage(int damage, DMG_TYPE type, Creature* agent) override;
+	virtual void takeDamage(Attack* attack, Creature* agent) override;
 	virtual bool deathCheck() override;
 	virtual bool prepNextAttack(Attack* atk, Creature* target) override;
 	virtual void getAttackList(std::vector<Attack*>& atks) override;
 	virtual void cleanupAttackList(std::vector<Attack*>& atks) override;
 	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop, bool dual = false);
 	virtual void incentivizeProp(WEAPON_PROPS_BITS prop);
-	virtual int getMaxAtkRange(bool dual = false);
+	virtual float getMaxAtkRange(bool dual = false);
 
 	bool loadOffhandAttack(Attack& atk, Creature* target);
 	void usedBonusAction() { m_bonus--; }

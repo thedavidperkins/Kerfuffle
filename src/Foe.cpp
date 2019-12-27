@@ -162,7 +162,7 @@ bool Foe::_defineFromStream(std::stringstream& defStream, std::string& errStatus
 			std::string dmgString;
 			DMG_TYPE type = BLUDGEONING;
 			WEAPON_PROPS props = 0;
-			int minRange = 0, maxRange = 5, disRange = 5;
+			float minRange = 0, maxRange = 5, disRange = 5;
 			std::vector<AttackEffect> attackEffects;
 			while (line.find("ENDATK") != 0) {
 				std::getline(defStream, line);
@@ -281,14 +281,14 @@ void Foe::_checkDmg() {
 }
 
 
-void Foe::takeDamage(int damage, DMG_TYPE type) {
-	Creature::takeDamage(damage, type);
+void Foe::takeDamage(int damage, DMG_TYPE type, Creature* agent) {
+	Creature::takeDamage(damage, type, agent);
 	_checkDmg();
 }
 
 
-void Foe::takeDamage(Attack* attack) {
-	Creature::takeDamage(attack);
+void Foe::takeDamage(Attack* attack, Creature* agent) {
+	Creature::takeDamage(attack, agent);
 	_checkDmg();
 }
 
@@ -300,9 +300,9 @@ bool Foe::hasAttackProp(WEAPON_PROPS_BITS prop, bool) {
 }
 
 
-int Foe::getMaxAtkRange(bool) {
-	int max = 0;
-	int mx, mn, dis;
+float Foe::getMaxAtkRange(bool) {
+	float max = 0;
+	float mx, mn, dis;
 	for (auto& a : m_attacks) {
 		a->getMinMaxDisRange(mn, mx, dis);
 		if (mx > max) max = mx;

@@ -21,6 +21,8 @@ bool FeatureAction::invoke(std::vector<Creature*>& friends, std::vector<Creature
 }
 
 
-void FeatureAction::setPriorityWeight(ARCHETYPE arch) {
+void FeatureAction::setPriorityWeight(ARCHETYPE arch, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
 	m_weight = 100;
+
+	m_featureTracker->adjustPriority(m_weight, friends, enemies);
 }

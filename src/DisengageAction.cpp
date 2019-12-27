@@ -18,6 +18,6 @@ bool DisengageAction::invoke(std::vector<Creature*>&, std::vector<Creature*>&) {
 }
 
 
-void DisengageAction::setPriorityWeight(ARCHETYPE arch) {
+void DisengageAction::setPriorityWeight(ARCHETYPE, const std::vector<Creature*>&, const std::vector<Creature*>&) {
 	m_weight = 0;
 }

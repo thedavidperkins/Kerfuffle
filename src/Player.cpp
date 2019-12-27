@@ -346,14 +346,14 @@ void Player::_checkDmg() {
 }
 
 
-void Player::takeDamage(int damage, DMG_TYPE dmgType) {
-	Creature::takeDamage(damage, dmgType);
+void Player::takeDamage(int damage, DMG_TYPE dmgType, Creature* agent) {
+	Creature::takeDamage(damage, dmgType, agent);
 	_checkDmg();
 }
 
 
-void Player::takeDamage(Attack* attack) {
-	Creature::takeDamage(attack);
+void Player::takeDamage(Attack* attack, Creature* agent) {
+	Creature::takeDamage(attack, agent);
 	_checkDmg();
 }
 
@@ -542,9 +542,9 @@ void Player::incentivizeProp(WEAPON_PROPS_BITS prop) {
 	m_propIncentives |= prop;
 }
 
-int Player::getMaxAtkRange(bool dual) {
-	int max = 0;
-	int mx, mn, dis;
+float Player::getMaxAtkRange(bool dual) {
+	float max = 0;
+	float mx, mn, dis;
 	if (!dual) {
 		for (auto& l : m_loadouts) {
 			wepMinMaxDisRange(l->getWepType(), mn, mx, dis);

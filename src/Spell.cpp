@@ -97,6 +97,35 @@ Spell* Spell::makeSpell(SPELLS spl, Creature* user) {
 }
 
 
+void Spell::adjustWeight(uint32_t& weight, const std::vector<Creature*>&, const std::vector<Creature*>& enemies) {
+	//if((m_user->getHighestAvailableSpellLevel() & m_lvlBits))
+	//TODO early exit if spell can't be cast
+
+	auto threatList = sortCreaturesByMostThreat(enemies);
+	Creature* topThreat = threatList.front();
+	uint16_t threatLevel = topThreat->getThreatLevel();
+
+	// Don't wast huge spells on near death enemies even if they are the top threat
+	if (topThreat->isNearDeath()) {
+		threatLevel /= 2;
+	}
+
+	// use threat to determine appropriate spell level: choose too weak a spell before too strong
+	SPELL_LEVELS spellLevelBitForThreat = 1 << threatLevel;
+	if (m_lvlBits & spellLevelBitForThreat) {
+		// average with the weight set at the action level
+		weight = (weight + TOP_PRIORITY) / 2;
+	}
+	else if (m_lvlBits < spellLevelBitForThreat) {
+		// average with the weight set at the action level
+		weight = (weight + HIGH_PRIORITY) / 2;
+	}
+	else {
+		// average with the weight set at the action level
+		weight = (weight + MID_PRIORITY) / 2;
+	}
+}
+
 //===========================================================
 
 
@@ -139,7 +168,7 @@ bool AcidSplashSpell::cast() {
 			LOG(en->getName() + " successfully saves and takes no damage.");
 		}
 		else {
-			en->takeDamage(dmg, m_attack.getDmgType());
+			en->takeDamage(dmg, m_attack.getDmgType(), m_user);
 		}
 	}
 

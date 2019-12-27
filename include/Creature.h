@@ -41,6 +41,7 @@ enum CONDITION_BITS {
 	C_FRIGHTENED = 0x1,
 	C_CHARMED = 0x2,
 	C_POISONED = 0x4,
+	C_PRONE = 0x8,
 };
 typedef unsigned int CONDITION;
 
@@ -49,15 +50,15 @@ public:
 	virtual ~Creature();
 	void init();
 	virtual void takeTurn(std::vector<Creature*>& friends, std::vector<Creature*>& enemies) = 0;
-	virtual void takeDamage(int damage, DMG_TYPE type);
-	virtual void takeDamage(Attack* attack);
+	virtual void takeDamage(int damage, DMG_TYPE type, Creature* agent);
+	virtual void takeDamage(Attack* attack, Creature* agent);
 	virtual bool deathCheck() = 0;
 	virtual bool prepNextAttack(Attack* atk, Creature* target) = 0;
 	virtual void getAttackList(std::vector<Attack*>& atks) = 0;
 	virtual void cleanupAttackList(std::vector<Attack*>& atks) = 0;
 	virtual bool hasAttackProp(WEAPON_PROPS_BITS prop, bool dual = false) = 0;
 	virtual void incentivizeProp(WEAPON_PROPS_BITS prop) {}
-	virtual int getMaxAtkRange(bool dual = false) = 0;
+	virtual float getMaxAtkRange(bool dual = false) = 0;
 
 	bool checkHit(Attack* attack);
 	
@@ -65,6 +66,9 @@ public:
 
 	void usedSpell() { m_spellCast--; }
 	void usedAction() { m_actions--; }
+
+	SPELL_LEVELS getSlotsAvailableMask() const;
+	SPELL_LEVEL_BITS getHighestAvailableSpellLevel() const;
 
 	bool isStanding() const { return m_alive; }
 	bool isDead() const { return m_dead; }
@@ -75,13 +79,17 @@ public:
 	int getSpellDC() const { return m_spellDC; }
 	bool hadAdvantage() const { return m_hadAdvantage; }
 	bool hadDisadvantage() const { return m_hadDisadvantage; }
-	int getSpeed() const { return m_speed; }
+	float getSpeed() const { return m_speed; }
+	float getDistanceTraveled() const { return m_speed - m_movementRemaining; }
 	int getHP() const { return m_HP; }
 	int getHPTP() const { return m_HP + m_tempHP; }
 	int getMaxHP() const { return m_maxHP; }
 	int getHealthLost() const { return m_maxHP - m_HP; }
+	bool isBloodied() const { return getHealthLost() > getHP(); }
+	bool isNearDeath() const { return getHealthLost() >= 3 * getHP(); }
 	CONDITION getCondition() const { return m_condition; }
 	void addCondition(CONDITION_BITS condition) { m_condition |= condition; }
+	void removeCondition(CONDITION_BITS condition) { m_condition &= ~condition; }
 	void healBy(int healing);
 
 	std::string getName() const { return m_name; }
@@ -120,7 +128,7 @@ public:
 
 	float getRemainingRange();
 	Cell* getCell() { return m_cell; }
-	bool moveToRangeOf(Creature* target, int range);
+	bool moveToRangeOf(Creature* target, float range);
 	bool moveToAdjacent(Creature* target);
 	bool moveToCell(Cell* dest);
 
@@ -138,6 +146,9 @@ public:
 	void setAtkdThisTurn() { m_atkdThisTurn = true; }
 	bool tookDmgThisTurn() { return m_tookDmgThisTurn; }
 	void setTookDmgThisTurn() { m_tookDmgThisTurn = true; }
+
+	void adjustThreat(uint32_t damageDealt);
+	uint16_t getThreatLevel() { return m_threatLevel; }
 
 protected:
 	Creature();
@@ -223,8 +234,10 @@ protected:
 	int m_x;
 	int m_y;
 	Cell* m_cell;
-	int m_speed;
+	float m_speed;
 	float m_movementRemaining;
+
+	uint16_t m_threatLevel;
 };
 
 bool checkProfsFromString(const std::string& token, CHECK_TYPE& val);
@@ -234,6 +247,7 @@ ABILITY_SCORES checkAbility(CHECK_TYPE chk);
 
 std::vector<Creature*> sortCreaturesBy(const std::vector<Creature*> list, std::function<bool(Creature*, Creature*)> pred);
 std::vector<Creature*> sortCreaturesByLeastHealth(const std::vector<Creature*> list);
+std::vector<Creature*> sortCreaturesByMostThreat(const std::vector<Creature*> list);
 
 #endif//KERF_CREATURE_H
 

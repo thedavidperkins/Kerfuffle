@@ -23,7 +23,7 @@ void OffhandAttack::invoke() {
 	Attack atk(plyr);
 	if (!plyr->loadOffhandAttack(atk, m_target)) return;
 	if (m_target->checkHit(&atk)) {
-		m_target->takeDamage(&atk);
+		m_target->takeDamage(&atk, m_user);
 	}
 	else {
 		LOG(m_user->getName() + " misses!");

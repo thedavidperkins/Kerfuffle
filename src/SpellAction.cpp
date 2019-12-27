@@ -19,7 +19,7 @@ bool SpellAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*>
 	return m_spell->cast();
 }
 
-void SpellAction::setPriorityWeight(ARCHETYPE arch) {
+void SpellAction::setPriorityWeight(ARCHETYPE arch, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
 	switch (arch)
 	{
 	case BRAWLER:
@@ -34,4 +34,6 @@ void SpellAction::setPriorityWeight(ARCHETYPE arch) {
 	default:
 		throw std::runtime_error("Error: unrecognized archetype for action priority.");
 	}
+
+	m_spell->adjustWeight(m_weight, friends, enemies);
 }

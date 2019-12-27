@@ -12,7 +12,7 @@ public:
 	virtual bool invoke(std::vector<Creature*>& friends, std::vector<Creature*>& enemies);
 
 	// in the long run priority should be set by the spell tracker
-	virtual void setPriorityWeight(ARCHETYPE arch);
+	virtual void setPriorityWeight(ARCHETYPE arch, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
 
 	// No need to implement resetActionState for feature actions; this is handled by Creature::_resetFtreTrkrs()
 private:

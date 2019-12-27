@@ -88,7 +88,7 @@ bool LayOnHandsTrkr::isUsable(const std::vector<Creature*>& friends, const std::
 	// is there a need?
 	std::vector<Creature*> sorted = sortCreaturesByLeastHealth(friends);
 	for (auto& f : sorted) {
-		if (f->getHealthLost() < f->getHP()) { // Don't waste a turn on this unless the target is bloodied
+		if (!f->isBloodied()) { // Don't waste a turn on this unless the target is bloodied
 			continue;
 		}
 		if (f == m_owner) { // can always LoH self

@@ -57,6 +57,6 @@ bool DashAction::invoke(std::vector<Creature*>&, std::vector<Creature*>&) {
 }
 
 
-void DashAction::setPriorityWeight(ARCHETYPE arch) {
+void DashAction::setPriorityWeight(ARCHETYPE, const std::vector<Creature*>&, const std::vector<Creature*>&) {
 	m_weight = 10;
 }

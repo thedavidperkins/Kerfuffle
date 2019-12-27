@@ -14,6 +14,7 @@ class Creature;
 enum ATTACK_EFFECT_TYPE
 {
 	A_POISONING = 0,
+	A_CHARGE,
 	N_ATTACK_EFFECT_TYPES
 };
 
@@ -33,9 +34,9 @@ public:
 	void load(DMG_TYPE type, int atkBonus, const std::string& dmgString, 
 		int dmgBonus = -1,
 		WEAPON_PROPS props = 0,
-		int minRange = 0,
-		int maxRange = 5,
-		int disRange = 5,
+		float minRange = 0,
+		float maxRange = 5,
+		float disRange = 5,
 		const std::vector<AttackEffect>& effects = {}
 	);
 	void load(const Attack& rhs);
@@ -44,11 +45,12 @@ public:
 	int dmg(Creature* target);
 	DMG_TYPE dmgType();
 	bool isLoaded() const { return m_loaded; }
+	bool isMelee() const { return m_maxRange <= 5; }
 	void setDisadvantage(bool dis) { m_disadvantage = dis; }
 	void setAdvantage(bool adv) { m_advantage = adv; }
 	WEAPON_PROPS getProps() const { return m_curProps; }
 	void subtractProp(WEAPON_PROPS_BITS prop) { if (m_curProps & prop) m_curProps -= prop; }
-	void getMinMaxDisRange(int& min, int& max, int& dis);
+	void getMinMaxDisRange(float& min, float&max, float& dis);
 	void restore() { m_curProps = m_props; }
 
 	std::string getUser() const;
@@ -69,9 +71,9 @@ private:
 	bool m_advantage;
 	bool m_disadvantage;
 	bool m_crit;
-	int m_maxRange;
-	int m_minRange;
-	int m_disRange;
+	float m_maxRange;
+	float m_minRange;
+	float m_disRange;
 
 	std::vector<AttackEffect> m_attackEffects;
 };

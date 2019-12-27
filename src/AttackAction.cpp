@@ -38,7 +38,7 @@ bool AttackAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*
 			attacked = true;
 		}
 		if (target->checkHit(curAttack)) {
-			target->takeDamage(curAttack);
+			target->takeDamage(curAttack, m_user);
 		}
 		else {
 			LOG(m_user->getName() + " misses!");
@@ -56,7 +56,7 @@ bool AttackAction::invoke(std::vector<Creature*>& friends, std::vector<Creature*
 }
 
 
-void AttackAction::setPriorityWeight(ARCHETYPE arch) {
+void AttackAction::setPriorityWeight(ARCHETYPE arch, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
 	switch (arch)
 	{
 	case BRAWLER:

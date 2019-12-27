@@ -1,6 +1,5 @@
-resources\squirmyworm.txt
-resources\squirmyworm.txt
-resources\squirmyworm.txt
+resources\giantboar.txt
+resources\giantboar.txt
 
 resources\ferghus.txt
 resources\caedrak.txt

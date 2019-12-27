@@ -68,6 +68,8 @@ public:
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) = 0;
 	virtual bool invoke() = 0;
 	virtual void reset() = 0;
+
+	virtual void adjustPriority(uint32_t& weight, const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {}
 };
 
 //=================================================================================

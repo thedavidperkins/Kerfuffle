@@ -28,7 +28,7 @@ typedef uint16_t SPELL_LEVELS;
 const SPELL_LEVELS L1_AND_UP = L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8 | L9;
 
 
-#define SPELL_DEF(_className_, spellName, _actionTiming_, _levelBits_, _range_ ) \
+#define SPELL_DEF(_className_, _dmgString_, _dmgType_, spellName, _actionTiming_, _levelBits_, _range_, _effects ) \
 	S_##spellName,
 
 enum SPELLS {
@@ -80,10 +80,46 @@ protected:
 };
 
 
+class AttackSpell : public Spell
+{
+public:
+	AttackSpell(SPELL spell, Creature* user)
+		: Spell(spell, user)
+		, m_attack()
+	{
+		m_attack.load(dmgTypeFromSpl(spell), user->getSpellMod(), dmgFromSpl(spell), 0, 0, 0, m_range, m_range, effectsFromSpl(spell));
+	}
+
+	virtual ~AttackSpell() {}
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	virtual bool cast();
+protected:
+	Attack m_attack;
+};
+
+class AreaAttackSpell : public Spell
+{
+public:
+	AreaAttackSpell(SPELL spell, Creature* user)
+		: Spell(spell, user)
+		, m_attack(user)
+	{
+		m_attack.load(dmgTypeFromSpl(spell), dmgFromSpl(spell), user->getSpellDC(), 0, 0, m_range, m_range, effectsFromSpl(spell));
+	}
+
+	virtual ~AreaAttackSpell() {}
+	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);
+	virtual bool cast();
+protected:
+	AreaAttack m_attack;
+};
+
+
 #define BEGIN_SPELL_CLASS(className, spellName)																\
 class className##Spell : public Spell {																		\
 public:																										\
-	className##Spell(Creature* user);																		\
+	className##Spell(Creature* user)																		\
+		: Spell(spellName, user) {}																			\
 	virtual ~className##Spell();																			\
 	virtual bool isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies);	\
 	virtual bool cast();
@@ -91,10 +127,19 @@ public:																										\
 #define END_SPELL_CLASS };
 
 
+#define BEGIN_ATTACK_SPELL_CLASS(className, spellName)	\
+class className##Spell : public AttackSpell				\
+{														\
+	className##Spell(Creature* user)					\
+		: AttackSpell(spellName, user) {}				\
+	virtual ~className##Spell {}						
+
+#define END_ATTACK_SPELL_CLASS END_SPELL_CLASS
+
 //===========================================================
 
 
-BEGIN_SPELL_CLASS(AcidSplash, ACID_SPLASH)
+BEGIN_SPELL_CLASS(AcidSplash)
 protected:
 	AreaAttack m_attack;
 END_SPELL_CLASS
@@ -103,7 +148,7 @@ END_SPELL_CLASS
 //===========================================================
 
 
-BEGIN_SPELL_CLASS(FireBolt, FIRE_BOLT)
+BEGIN_SPELL_CLASS(FireBolt)
 protected:
 	Attack m_attack;
 END_SPELL_CLASS
@@ -113,22 +158,22 @@ END_SPELL_CLASS
 
 
 // Dummy definition for virtual spell functions awaiting full definition
-#define SPELL_DEF_BASIC(className, spellName )	\
-BEGIN_SPELL_CLASS(className, spellName)			\
+#define SPELL_DEF_BASIC(className)	\
+BEGIN_SPELL_CLASS(className)			\
 END_SPELL_CLASS
 
 
-SPELL_DEF_BASIC(RayOfFrost, RAY_OF_FROST)
-SPELL_DEF_BASIC(ShockingGrasp, SHOCKING_GRASP)
-SPELL_DEF_BASIC(Thornwhip, THORNWHIP)
-SPELL_DEF_BASIC(Grease, GREASE)
-SPELL_DEF_BASIC(MageArmor, MAGE_ARMOR)
-SPELL_DEF_BASIC(Shield, SHIELD)
-SPELL_DEF_BASIC(BurningHands, BURNING_HANDS)
-SPELL_DEF_BASIC(HealingWord, HEALING_WORD)
-SPELL_DEF_BASIC(MagicMissile, MAGIC_MISSILE)
-SPELL_DEF_BASIC(Sleep, SLEEP)
-SPELL_DEF_BASIC(Thunderwave, THUNDERWAVE)
+SPELL_DEF_BASIC(RayOfFrost)
+SPELL_DEF_BASIC(ShockingGrasp)
+SPELL_DEF_BASIC(Thornwhip)
+SPELL_DEF_BASIC(Grease)
+SPELL_DEF_BASIC(MageArmor)
+SPELL_DEF_BASIC(Shield)
+SPELL_DEF_BASIC(BurningHands)
+SPELL_DEF_BASIC(HealingWord)
+SPELL_DEF_BASIC(MagicMissile)
+SPELL_DEF_BASIC(Sleep)
+SPELL_DEF_BASIC(Thunderwave)
 
 
 #endif//KERF_SPELL_H

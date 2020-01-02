@@ -70,8 +70,54 @@ int d100() {
 	return randInt(100);
 }
 
-std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus, std::function<int(void)>& singleDie) {
+std::function<int(void)> funcFromStr(const std::string& token, int& dmgBonus, std::function<int(void)>& singleDie, size_t userLevel) {
 	std::stringstream procToken(token);
+
+	// parse out appropriate level threshold
+	if (procToken.peek() == 'L')
+	{
+		int levelThreshold = 0;
+		while (procToken)
+		{
+			// skip 'L'
+			procToken.get();
+
+			// get two digit level threshold
+			int levelThreshold = 10 * (procToken.get() - '0');
+			levelThreshold += procToken.get() - '0';
+
+			// confirm level is not over threshold, otherwise 
+			//	jump to next level threshold in string stream
+			if (levelThreshold >= userLevel)
+			{
+				break;
+			}
+			else
+			{
+				while (procToken && procToken.peek() != 'L')
+				{
+					procToken.get();
+				}
+			}
+		}
+
+		if (procToken)
+		{
+			// Skip ':' following level threshold 
+			procToken.get();
+			constexpr size_t BUF_SIZE = 1024;
+			char bufStr[BUF_SIZE];
+			// capture string up to semicolon
+			procToken.get(bufStr, BUF_SIZE, ';');
+			procToken.clear();
+			procToken.str(bufStr);
+		}
+		else
+		{
+			return []() { return 0; };
+		}
+	}
+
 	int quant;
 	int die;
 	dmgBonus = 0;

@@ -6,22 +6,25 @@
 #include "Spell.h"
 #include "Logger.h"
 
-#define SPELL_DEF(_className_, spellName, actionTiming, levelBits, range) \
-{ #spellName, S_##spellName, actionTiming, levelBits, range },
+#define SPELL_DEF(_className_, dmgString, dmgType, spellName, actionTiming, levelBits, range, effects ) \
+{ #spellName, dmgString, dmgType, S_##spellName, actionTiming, levelBits, range, effects },
 
 
 struct SpellDetails {
 	std::string name;
+	std::string dmgString;
+	DMG_TYPE dmgType;
 	SPELLS spell;
 	ACTION_TIMING timing;
 	SPELL_LEVELS lvls;
 	float range;
+	std::vector<AttackEffect> effects;
 };
 
 
 static std::vector<SpellDetails> lSpellDetails{
 #include "SpellDefs.inl"
-	{ "Invalid", S_INVALID_SPELL, ACTION_TIMING_INVALID, CANTRIP, 0.f }
+	{ "Invalid", "", FORCE, S_INVALID_SPELL, ACTION_TIMING_INVALID, CANTRIP, 0.f, {} }
 };
 
 
@@ -50,31 +53,6 @@ static const SpellDetails& getSpellDetails(std::string name) {
 }
 
 
-static std::vector<Creature*> getPriorityTargetsInRange(
-	const Creature* agent,
-	float range,
-	const std::vector<Creature*>& targets,
-	std::function<bool(Creature*)> meetsPriority,
-	std::function<bool(Creature*, Creature*)> orderFunc )
-{
-	std::vector<Creature*> targetsInRange = agent->getCreaturesInRange(targets, range);
-	std::sort(targetsInRange.begin(), targetsInRange.end(), orderFunc);
-	std::vector<Creature*> validTargets;
-	for (auto iter = targetsInRange.begin(); iter != targetsInRange.end(); --iter)
-	{
-		if (meetsPriority(*iter))
-		{
-			validTargets.push_back(*iter);
-		}
-		else
-		{
-			break;
-		}
-	}
-	return validTargets;
-}
-
-
 bool splFrmStr(const std::string& str, SPELLS& spl) {
 	const SpellDetails& deets = getSpellDetails(str);
 	if (deets.name != str) {
@@ -89,6 +67,16 @@ bool splFrmStr(const std::string& str, SPELLS& spl) {
 
 std::string strFromSpl(SPELLS spl) {
 	return getSpellDetails(spl).name;
+}
+
+
+std::string dmgFromSpl(SPELLS spl) {
+	return getSpellDetails(spl).dmgString;
+}
+
+
+DMG_TYPE dmgTypeFromSpl(SPELLS spl) {
+	return getSpellDetails(spl).dmgType;
 }
 
 
@@ -107,7 +95,12 @@ float rangeFromSpl(SPELLS spl) {
 }
 
 
-#define SPELL_DEF(className, spellName, _actionTiming_, _levelBits_, _range_)		\
+const std::vector<AttackEffect>& effectsFromSpl(SPELLS spl) {
+	return getSpellDetails(spl).effects;
+}
+
+
+#define SPELL_DEF(className, _dmgString_, _dmgType_, spellName, _actionTiming_, _levelBits_, _range_, _effects_ )		\
 	case S_##spellName:									\
 		return new className##Spell(user);
 
@@ -202,46 +195,38 @@ bool AcidSplashSpell::cast() {
 
 //===========================================================
 
-FireBoltSpell::FireBoltSpell(Creature* user)
-	: Spell(S_FIRE_BOLT, user)
-	, m_attack(user)
-{
-	std::string dmgString = "1d10";
-	int lvl = user->getLvl();
-	if (lvl >= 17)
+
+bool AttackSpell::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
+	std::vector<Creature*> enemiesInRange =
+		m_user->getCreaturesInRange(enemies, m_range + m_user->getRemainingRange());
+
+	sortCreaturesByMostThreat(enemiesInRange);
+	Creature* target = enemiesInRange.front();
+	if (target != nullptr)
 	{
-		dmgString = "4d10";
+		uint16_t mostThreat = target->getThreatLevel();
+		if (mostThreat & m_lvlBits || mostThreat > m_lvlBits)
+		{
+			m_targets.push_back(target);
+			return true;
+		}
 	}
-	else if (lvl >= 11)
-	{
-		dmgString = "3d10";
-	}
-	else if (lvl >= 5)
-	{
-		dmgString = "2d10";
-	}
-	m_attack.load(FIRE, user->getSpellMod(), dmgString, 0, 0, 0, 120, 120);
+	return false;
 }
 
 
-FireBoltSpell::~FireBoltSpell() {}
-
-
-bool FireBoltSpell::isUsable(const std::vector<Creature*>& friends, const std::vector<Creature*>& enemies) {
-	float dummy1 = -1.f;
-	float dummy2 = -1.f;
-	float maxRange = 0.f;
-	m_attack.getMinMaxDisRange(dummy1, maxRange, dummy2);
-	std::vector<Creature*> validTargets =
-		getPriorityTargetsInRange(m_user, maxRange + m_user->getRemainingRange(), enemies,
-			[](Creature* target) {
-				return target->
-			},
-		)
-}
-
-
-bool FireBoltSpell::cast() {
+bool AttackSpell::cast() {
+	Creature* target = m_targets.front();
+	LOG(m_user->getName() + " attempts to cast " + m_name + " at " + target->getName());
+	if (m_user->moveToRangeOf(m_targets.front(), m_range))
+	{
+		if (target->checkHit(&m_attack))
+		{
+			target->takeDamage(&m_attack, m_user);
+		}
+		return true;
+	}
+	LOG(m_user->getName() + " was unable to cast " + m_name);
 	return false;
 }
 
